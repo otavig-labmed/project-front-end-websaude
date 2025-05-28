@@ -1,4 +1,4 @@
-import{j as bn,g as yn,R as Ne}from"./index-Dw-yZ_EK.js";const jr=({children:t,type:e="button",onClick:n,className:a=""})=>bn.jsx("button",{type:e,onClick:n,className:`submit-btn ${a}`,children:t});/*!
+import{j as bn,g as yn,R as Ne}from"./index-ll4bCBSg.js";const jr=({children:t,type:e="button",onClick:n,className:a=""})=>bn.jsx("button",{type:e,onClick:n,className:`submit-btn ${a}`,children:t});/*!
  * Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  * Copyright 2024 Fonticons, Inc.
