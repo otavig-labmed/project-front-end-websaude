@@ -1,20 +1,27 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext'; // Adjust path as needed
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
-  // You can add roles or other checks here if needed
-  // allowedRoles?: string[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const { isAuthenticated, userRole, permissions, isLoading } = useAuth(); // Get auth state and data
 
-  if (!token) {
+  // Show a loading state while authentication data is being fetched
+  if (isLoading) {
+    return <div>Loading authentication...</div>; // Or your LoadingSpinner component
+  }
+
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  return children ? <>{children}</> : <Outlet />;
+  // If authenticated, render the children or Outlet, passing userRole and permissions as context
+  // This is crucial for passing data to nested routes
+  return children ? <>{children}</> : <Outlet context={{ userRole, permissions }} />;
 };
 
 export default ProtectedRoute;
