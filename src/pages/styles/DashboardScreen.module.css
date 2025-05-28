@@ -1,0 +1,122 @@
+.dashboardBody {
+  height: 100vh;
+}
+
+.dashboardWrapper {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  width: 200px; 
+  min-width: 100px; 
+  background-color: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1rem;
+  overflow: hidden;
+  z-index: 2;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); 
+}
+
+
+.sidebar nav {
+  width: 100%;
+}
+
+.sidebar nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.sidebar nav ul li {
+  padding: 0.9rem 1.5rem; 
+  color: #555;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+  justify-content: flex-start;
+  position: relative;
+}
+
+.sidebar nav ul li:hover {
+  background-color: #e9f0f8;
+  color: #007bff;
+  transform: translateX(5px);
+}
+
+.sidebar nav ul li i {
+  margin-right: 1rem;
+  font-size: 1.3rem;
+  width: 25px;
+  text-align: center;
+  color: #777;
+  transition: color 0.2s ease;
+}
+
+.sidebar nav ul li:hover i {
+  color: #007bff;
+}
+
+.sidebar nav ul li span {
+  opacity: 1; 
+  visibility: visible; 
+  font-weight: 500;
+}
+
+.sidebar nav ul li.active {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.sidebar nav ul li.active i {
+  color: #ffffff;
+}
+
+.mainArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.topbar {
+  height: 60px;
+  min-height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 0 2rem;
+  border-bottom: 1px solid #e0e0e0;
+  z-index: 1;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #34495e;
+  white-space: nowrap;
+}
+
+.logo span {
+  color: #007bff;
+}
+
+.dashboardContent {
+  flex: 1;
+  padding: 2rem;
+  background-color: #f8f9fa;
+  overflow-y: auto;
+}

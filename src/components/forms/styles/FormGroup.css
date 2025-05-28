@@ -1,0 +1,15 @@
+.form-group {
+    margin-bottom: 1.75rem;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: #555;
+    transition: all 0.3s ease;
+    padding-left: 0.5rem;
+    cursor: pointer;
+}
