@@ -17,9 +17,9 @@ const LoginScreen: React.FC = () => {
   };
 
   // Test
-  useEffect(() => {
-    console.log(endpoints[type]);
-  });
+  // useEffect(() => {
+  //   console.log(endpoints[type]);
+  // });
 
   async function handleLogin(email: string, password: string) {
     const endpoint = endpoints[type] || endpoints["client"];

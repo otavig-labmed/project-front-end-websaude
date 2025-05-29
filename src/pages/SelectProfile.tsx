@@ -1,6 +1,7 @@
 import React from 'react';
 import AccessCard from '../components/cards/AccessCard';
 import './styles/SelectProfileStyle.css';
+import './styles/variables.css';
 
 const SelectProfile: React.FC = () => {
   return (

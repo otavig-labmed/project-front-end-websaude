@@ -48,7 +48,6 @@ const DashboardScreen: React.FC = () => {
 
   // Render content based on active item
   const renderContent = () => {
-    // ... (Your existing renderContent logic remains the same) ...
     if (userRole === 'doctor' && activeItem === 'dashboard') {
         return (
           <div className={styles.doctorDashboardContent}>
@@ -67,7 +66,7 @@ const DashboardScreen: React.FC = () => {
           </div>
         );
       }
-      // ... rest of your switch cases
+
       switch (activeItem) {
         case 'dashboard':
           return (
@@ -76,7 +75,7 @@ const DashboardScreen: React.FC = () => {
               <p>This is where your {activeItem} content will be displayed.</p>
             </>
           );
-        // ... (remaining cases) ...
+ 
         case 'findings': return <h1>Findings Section</h1>;
         case 'engagements': return <h1>Engagements Section</h1>;
         case 'reports': return <h1>Reports Section</h1>;
@@ -151,7 +150,6 @@ const DashboardScreen: React.FC = () => {
                 </li>
               )}
 
-              {/* Specific items based on HTML logic and permissions */}
               {userRole === 'doctor' && permissions.prontuario_visualizar > 0 && (
                 <li className={activeItem === 'medical-attention' ? styles.active : ''} onClick={() => handleItemClick('medical-attention')}>
                   <i className="fas fa-user-doctor"></i>

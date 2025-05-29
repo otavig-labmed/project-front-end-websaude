@@ -1,5 +1,5 @@
 .selectprofile-wrapper {
-  background: linear-gradient(135deg, var(--light-bg) 0%, #e2eafc 100%);
+  background: linear-gradient(135deg, var(--light-bg, #f8f9fa) 0%, #e2eafc 100%);
   min-height: 100vh;
   padding: 2rem;
   display: flex;
@@ -27,7 +27,7 @@
 }
 
 .selectprofile-logo i {
-  color: var(--accent-purple);
+  color: var(--primary);
 }
 
 .selectprofile-title {
@@ -38,7 +38,6 @@
   -webkit-background-clip: text;
   background-clip: text;
   font-family: 'Poppins', sans-serif;
-  color: transparent;
 }
 
 .selectprofile-subtitle {
