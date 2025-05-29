@@ -1,32 +1,50 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; 
+}
+
+html {
+  zoom: 1; 
+}
+
 .dashboardBody {
   height: 100vh;
+  display: flex;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f8f9fa;
+  overflow: hidden; 
 }
 
 .dashboardWrapper {
   display: flex;
-  height: 100vh;
+  height: 100%; 
   width: 100vw;
-  font-family: 'Segoe UI', sans-serif;
   background-color: #f8f9fa;
+  transition: all 0.3s ease-in-out; 
 }
 
 .sidebar {
-  width: 200px; 
-  min-width: 100px; 
+  width: 220px;
   background-color: #ffffff;
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; 
   padding-top: 1rem;
-  overflow: hidden;
+  overflow: hidden; 
   z-index: 2;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); 
+  font-size: 12px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  transition: width 0.3s ease-in-out;
+  position: relative;
+  box-sizing: border-box; 
 }
-
 
 .sidebar nav {
   width: 100%;
+  flex-grow: 1; 
 }
 
 .sidebar nav ul {
@@ -37,30 +55,31 @@
 }
 
 .sidebar nav ul li {
-  padding: 0.9rem 1.5rem; 
+  padding: 0.9rem 1.5rem;
   color: #555;
   display: flex;
   align-items: center;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
-  justify-content: flex-start;
+  justify-content: flex-start; 
   position: relative;
+  overflow: hidden;
 }
 
 .sidebar nav ul li:hover {
   background-color: #e9f0f8;
   color: #007bff;
-  transform: translateX(5px);
+  /* transform: translateX(5px); */
 }
 
 .sidebar nav ul li i {
   margin-right: 1rem;
   font-size: 1.3rem;
-  width: 25px;
+  width: 25px; 
   text-align: center;
   color: #777;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, margin-right 0.3s ease;
 }
 
 .sidebar nav ul li:hover i {
@@ -68,9 +87,11 @@
 }
 
 .sidebar nav ul li span {
-  opacity: 1; 
-  visibility: visible; 
+  opacity: 1;
+  visibility: visible;
   font-weight: 500;
+  transition: opacity 0.3s ease, visibility 0.3s ease, width 0.3s ease; /* Smooth transition for text */
+  flex-shrink: 0;
 }
 
 .sidebar nav ul li.active {
@@ -82,12 +103,60 @@
   color: #ffffff;
 }
 
+.sidebarToggle {
+  color: #777;
+  position: absolute;
+  bottom: 20px; 
+  left: 50%; 
+  transform: translateX(-50%);
+  border-radius: 20%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sidebarToggle:hover {
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.sidebarToggle i {
+  font-size: 1.2rem;
+  transition: transform 0.2s ease; 
+}
+
+
+.dashboardWrapper.collapsed .sidebar {
+  width: 70px;
+  align-items: center; 
+}
+
+.dashboardWrapper.collapsed .sidebar nav ul li {
+  padding: 0.9rem 0.5rem; 
+  justify-content: center;
+}
+
+.dashboardWrapper.collapsed .sidebar nav ul li i {
+  margin-right: 0; 
+}
+
+.dashboardWrapper.collapsed .sidebar nav ul li span {
+  opacity: 0;
+  visibility: hidden;
+  width: 0; 
+  padding: 0;
+  pointer-events: none; 
+}
+
 .mainArea {
-  flex: 1;
+  flex: 1; 
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; 
 }
 
 .topbar {
@@ -118,5 +187,5 @@
   flex: 1;
   padding: 2rem;
   background-color: #f8f9fa;
-  overflow-y: auto;
+  overflow-y: auto; 
 }

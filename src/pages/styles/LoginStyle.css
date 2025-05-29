@@ -1,6 +1,6 @@
 .body-center {
     font-family: 'Roboto', sans-serif;
-    background-color: #ffffff;
+    background: linear-gradient(135deg, var(--light-bg, #f8f9fa) 0%, #e2eafc 100%);
     background-size: cover;
     color: #333;
     min-height: 100vh;

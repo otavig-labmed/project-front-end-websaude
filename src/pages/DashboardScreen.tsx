@@ -2,21 +2,29 @@ import React, { useState } from "react";
 import { useOutletContext } from 'react-router-dom';
 import './styles/variables.css';
 import styles from './styles/DashboardScreen.module.css';
+// import CalendarScreen from "./subscreens/DoctorCalendarScreen"; // Assuming this is your base calendar component
+import DoctorCalendarScreen from "./subscreens/DoctorCalendarScreen"; // You'll create this
+// import AttendantCalendar from "./subscreens/AttendantCalendar"; // You'll create this
+import LogoutScreen from "./subscreens/LogoutScreen";
 
-// Define the type for the context data that DashboardScreen expects
+
 interface DashboardOutletContext {
   userRole: 'doctor' | 'admin' | 'attendant' | 'patient';
   permissions: { [key: string]: number };
 }
 
 const DashboardScreen: React.FC = () => {
-  // Use useOutletContext to access the data passed from the parent Route
   const { userRole, permissions } = useOutletContext<DashboardOutletContext>();
 
   const [activeItem, setActiveItem] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleItemClick = (itemName: string) => {
     setActiveItem(itemName);
+  };
+
+  const handleSidebarToggle = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
   };
 
   const isMenuItemVisible = (itemName: string) => {
@@ -25,7 +33,8 @@ const DashboardScreen: React.FC = () => {
     }
 
     if (userRole === 'doctor') {
-      if (itemName === 'calendar' && permissions.agenda_visualizar > 0) return true;
+      // Doctor's calendar permission check
+      if (itemName === 'doctor-calendar' && permissions.agenda_visualizar > 0) return true;
       if (itemName === 'medical-attention' && permissions.prontuario_visualizar > 0) return true;
     }
 
@@ -35,6 +44,8 @@ const DashboardScreen: React.FC = () => {
 
     if (userRole === 'attendant') {
       if (itemName === 'attendant-attention') return true;
+      // Attendant's calendar permission check
+      if (itemName === 'attendant-calendar' && permissions.agenda_visualizar > 0) return true;
       if (itemName === 'patients' && permissions.paciente_visualizar > 0) return true;
       if (itemName === 'financial' && permissions.financeiro_visualizar > 0) return true;
       if (itemName === 'procedures' && permissions.procedimento_visualizar > 0) return true;
@@ -46,7 +57,6 @@ const DashboardScreen: React.FC = () => {
     return false;
   };
 
-  // Render content based on active item
   const renderContent = () => {
     if (userRole === 'doctor' && activeItem === 'dashboard') {
         return (
@@ -75,14 +85,17 @@ const DashboardScreen: React.FC = () => {
               <p>This is where your {activeItem} content will be displayed.</p>
             </>
           );
- 
+        case 'doctor-calendar':
+            return <DoctorCalendarScreen />;
+        // case 'attendant-calendar':
+        //     return <AttendantCalendar />;
         case 'findings': return <h1>Findings Section</h1>;
         case 'engagements': return <h1>Engagements Section</h1>;
         case 'reports': return <h1>Reports Section</h1>;
         case 'users': return <h1>Users Management</h1>;
-        case 'calendar': return <h1>Calendar</h1>;
+        // case 'calendar': return <CalendarScreen />; // Keep this if it's a generic calendar not role-specific
         case 'settings': return <h1>Settings</h1>;
-        case 'logout': return <h1>Logging out...</h1>;
+        case 'logout': return <LogoutScreen />;
         case 'medical-attention': return <h1>Atendimento Médico</h1>;
         case 'patients': return <h1>Pacientes</h1>;
         case 'financial': return <h1>Caixa</h1>;
@@ -99,7 +112,7 @@ const DashboardScreen: React.FC = () => {
 
   return (
     <div className={styles.dashboardBody}>
-      <div className={styles.dashboardWrapper}>
+      <div className={`${styles.dashboardWrapper} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
         <aside className={styles.sidebar}>
           <nav>
             <ul>
@@ -137,12 +150,31 @@ const DashboardScreen: React.FC = () => {
                   <span>Users</span>
                 </li>
               )}
-              {isMenuItemVisible('calendar') && (
-                <li className={activeItem === 'calendar' ? styles.active : ''} onClick={() => handleItemClick('calendar')}>
+
+              {/* Doctor's Calendar */}
+              {userRole === 'doctor' && isMenuItemVisible('doctor-calendar') && (
+                <li className={activeItem === 'doctor-calendar' ? styles.active : ''} onClick={() => handleItemClick('doctor-calendar')}>
                   <i className="fas fa-calendar-alt"></i>
-                  <span>Agenda</span>
+                  <span>Agenda do Médico</span>
                 </li>
               )}
+
+              {/* Attendant's Calendar */}
+              {userRole === 'attendant' && isMenuItemVisible('attendant-calendar') && (
+                <li className={activeItem === 'attendant-calendar' ? styles.active : ''} onClick={() => handleItemClick('attendant-calendar')}>
+                  <i className="fas fa-calendar-check"></i>
+                  <span>Agenda do Atendente</span>
+                </li>
+              )}
+
+              {/* Generic Calendar (if still needed) */}
+              {userRole !== 'doctor' && userRole !== 'attendant' && isMenuItemVisible('calendar') && (
+                <li className={activeItem === 'calendar' ? styles.active : ''} onClick={() => handleItemClick('calendar')}>
+                  <i className="fas fa-calendar-alt"></i>
+                  <span>Agenda Geral</span>
+                </li>
+              )}
+
               {isMenuItemVisible('settings') && (
                 <li className={activeItem === 'settings' ? styles.active : ''} onClick={() => handleItemClick('settings')}>
                   <i className="fas fa-cog"></i>
@@ -217,6 +249,10 @@ const DashboardScreen: React.FC = () => {
               )}
             </ul>
           </nav>
+          {/* Toggle Button */}
+          <div className={styles.sidebarToggle} onClick={handleSidebarToggle}>
+            <i className={isSidebarCollapsed ? "fa-solid fa-angles-right" : "fas fa-solid fa-angles-left"}></i>
+          </div>
         </aside>
 
         <div className={styles.mainArea}>

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LoginForm from "../components/forms/LoginForm";
 import './styles/variables.css';

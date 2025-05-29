@@ -5,6 +5,14 @@
     font-family: 'Poppins', sans-serif;
 }
 
+html {
+  zoom: 0.8;
+}
+
+body {
+   background: linear-gradient(135deg, var(--light-bg, #f8f9fa) 0%, #e2eafc 100%);
+}
+
 .loading {
   text-align: center;
   margin-top: 3rem;
