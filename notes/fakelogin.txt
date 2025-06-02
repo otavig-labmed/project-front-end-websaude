@@ -1,0 +1,107 @@
+/**
+ * Função auxiliar para exibir o status na tela do console.
+ * @param {string} message - A mensagem a ser exibida.
+ * @param {string} type - Tipo da mensagem ('info', 'success', 'error').
+ */
+function logStatus(message, type = 'info') {
+    const styles = {
+        info: 'color: blue; font-weight: bold;',
+        success: 'color: green; font-weight: bold;',
+        error: 'color: red; font-weight: bold;'
+    };
+    console.log(`%c${message}`, styles[type]);
+}
+
+/**
+ * Simula um login, armazenando dados falsos no localStorage.
+ * Você pode chamar: fakeLogin('doctor'), fakeLogin('admin') ou fakeLogin('attendant').
+ * @param {'doctor' | 'admin' | 'attendant' | 'patient'} role - O papel do usuário.
+ */
+function fakeLogin(role) {
+    const fakeToken = `fake_jwt_token_${Math.random().toString(36).substring(2, 15)}`;
+    let fakePermissions = {};
+
+    switch (role) {
+        case 'doctor':
+            fakePermissions = {
+                prontuario_visualizar: 1,
+                is_master: 0
+            };
+            break;
+        case 'admin':
+            fakePermissions = {
+                is_master: 1,
+                prontuario_visualizar: 1,
+                paciente_visualizar: 1,
+                financeiro_visualizar: 1,
+                procedimento_visualizar: 1,
+                telemedicina_visualizar: 1
+            };
+            break;
+        case 'attendant':
+            fakePermissions = {
+                is_master: 0,
+                paciente_visualizar: 1,
+                financeiro_visualizar: 1,
+                procedimento_visualizar: 1,
+                telemedicina_visualizar: 1
+            };
+            break;
+        case 'patient':
+        default:
+            fakePermissions = {
+                is_master: 0
+            };
+    }
+
+    localStorage.setItem('token', fakeToken);
+    localStorage.setItem('userRole', role);
+    localStorage.setItem('permissions', JSON.stringify(fakePermissions));
+
+    logStatus(`Login simulado como ${role}. Dados armazenados no localStorage.`, 'success');
+    checkAuthStatus();
+}
+
+/**
+ * Simula um logout, removendo todos os dados de autenticação do localStorage.
+ */
+function fakeLogout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('permissions');
+
+    logStatus('Logout simulado. Dados de autenticação removidos do localStorage.', 'info');
+    checkAuthStatus();
+}
+
+/**
+ * Verifica o estado atual do localStorage e exibe no console.
+ */
+function checkAuthStatus() {
+    const storedToken = localStorage.getItem('token');
+    const storedRole = localStorage.getItem('userRole');
+    const storedPermissions = localStorage.getItem('permissions');
+
+    console.groupCollapsed('%c--- Status Atual do LocalStorage ---', 'color: purple; font-weight: bold;'); // Grupo expansível
+
+    logStatus('Verificando dados no localStorage:', 'info');
+    console.log('Token:', storedToken ? storedToken : 'NÃO ENCONTRADO');
+    console.log('User Role:', storedRole ? storedRole : 'NÃO ENCONTRADO');
+    console.log('Permissions:', storedPermissions ? JSON.parse(storedPermissions) : 'NÃO ENCONTRADO');
+
+    if (!storedToken) {
+        logStatus('Status: DESAUTENTICADO', 'error');
+    } else {
+        logStatus('Status: AUTENTICADO', 'success');
+    }
+    console.groupEnd(); // Fecha o grupo
+    logStatus('--- Fim do Status ---', 'info');
+}
+
+// --- Comandos para Teste Rápido ---
+// fakeLogin('doctor');    // Simula login de um médico
+// fakeLogin('admin');     // Simula login de um administrador
+// fakeLogin('attendant'); // Simula login de um atendente
+// fakeLogin('patient');   // Simula login de um paciente
+// checkAuthStatus();      // Verifica o que está no localStorage
+// fakeLogout();           // Limpa o localStorage de autenticação

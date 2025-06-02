@@ -1,0 +1,1 @@
+fontawesome-DgLQBZLA.js	⚠️ 64.26 kB	21.15 kB	Fonte pesada, mas aceitável. Se quiser reduzir, carregue só os ícones usados.

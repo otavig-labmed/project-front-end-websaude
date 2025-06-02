@@ -1,0 +1,11 @@
+ const menuComponents = [
+    { label: "Usuarios", component: <Users /> },
+    { label: "DashboardHome", component: < DashboardHome/> }
+
+  ];
+
+return (
+    <div>
+      <BodgettMenu components={menuComponents} />
+    </div>
+);
