@@ -283,3 +283,127 @@ html {
   90% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+.dashboardHomeContainer {
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 32px 0;
+    background: #f8fafc;
+}
+
+.dashboardGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 120px;
+}
+
+.cardTitle {
+    color: #64748b;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.cardValue {
+    color: #1e293b;
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.chartsSection {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+
+.chartCard {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    padding: 24px 20px;
+    flex: 1 1 320px;
+    min-width: 280px;
+}
+
+.chartTitle {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+.barChart {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    height: 160px;
+}
+
+.barItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+.bar {
+    width: 32px;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 6px;
+    transition: height 0.2s;
+    display: block;
+}
+
+.barLabel {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-top: 2px;
+}
+
+.noticesSection {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    padding: 24px 20px;
+    margin-bottom: 32px;
+}
+
+.noticesTitle {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.noticesList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.noticeItem {
+    color: #334155;
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}

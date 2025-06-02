@@ -1,11 +1,249 @@
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import styles from '../../../styles/pages-styles/CalendarStyle.module.css';
 
+const doctors = [
+  { id: '1', name: 'Dr. João Silva', specialty: 'Cardiologia', crm: 'CRM/SP 12345' },
+  { id: '2', name: 'Dra. Ana Costa', specialty: 'Dermatologia', crm: 'CRM/SP 67890' },
+  { id: '3', name: 'Dr. Pedro Oliveira', specialty: 'Pediatria', crm: 'CRM/SP 54321' }
+];
 
-const CalendarCreate = () => (
-  <div>
-    <h2>Agenda criar</h2>
-    <p>Bem-vindo à tela de agenda! Aqui você pode visualizar e gerenciar compromissos.</p>
-  </div>
-);
+const procedures = [
+  { id: '1', name: 'Consulta' },
+  { id: '2', name: 'Retorno' },
+  { id: '3', name: 'Exame' },
+  { id: '4', name: 'Vacina' },
+];
+
+const defaultEvent = {
+  title: '',
+  date: '',
+  startTime: '',
+  endTime: '',
+  color: '#3b82f6',
+  procedure: '',
+  value: '',
+};
+
+const CalendarCreate = () => {
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [showDoctorModal, setShowDoctorModal] = useState(true);
+  const [eventData, setEventData] = useState(defaultEvent);
+  const [events, setEvents] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const savedDoctorId = sessionStorage.getItem('selectedDoctorId');
+    if (savedDoctorId) {
+      const doctor = doctors.find(d => d.id === savedDoctorId);
+      if (doctor) {
+        setSelectedDoctor(doctor);
+        setShowDoctorModal(false);
+      }
+    }
+  }, []);
+
+  const handleDoctorSelect = (e) => {
+    const doctorId = e.target.value;
+    const doctor = doctors.find(d => d.id === doctorId);
+    setSelectedDoctor(doctor);
+    sessionStorage.setItem('selectedDoctorId', doctorId);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEventData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateEvent = (e) => {
+    e.preventDefault();
+    setError('');
+    if (!eventData.title || !eventData.date || !eventData.startTime || !eventData.endTime || !eventData.procedure || !eventData.value) {
+      setError('Preencha todos os campos obrigatórios.');
+      return;
+    }
+    if (!selectedDoctor) {
+      setError('Selecione um médico.');
+      return;
+    }
+    
+    if (eventData.startTime >= eventData.endTime) {
+      setError('A hora de início deve ser antes da hora de fim.');
+      return;
+    }
+    const newEvent = {
+      ...eventData,
+      doctorId: selectedDoctor.id,
+      id: Date.now().toString(),
+    };
+    setEvents(prev => [...prev, newEvent]);
+    setEventData(defaultEvent);
+  };
+
+  return (
+    <div className={styles.doctorCalendarContainer}>
+      {showDoctorModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3 className={styles.modalTitle}>Selecionar Médico</h3>
+            <select 
+              className={styles.doctorSelect}
+              onChange={handleDoctorSelect}
+              value={selectedDoctor?.id || ''}
+            >
+              <option value="">Selecione um médico</option>
+              {doctors.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.name} - {doctor.specialty}
+                </option>
+              ))}
+            </select>
+            <button 
+              className={styles.confirmButton}
+              onClick={() => selectedDoctor && setShowDoctorModal(false)}
+              disabled={!selectedDoctor}
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {selectedDoctor && (
+        <div className={styles.scrollContainer}>
+          <div className={styles.calendarHeader}>
+            <h1 className={styles.doctorTitle}>Criar Compromisso para {selectedDoctor.name}</h1>
+            <p className={styles.doctorInfo}>
+              CRM: {selectedDoctor.crm} | Especialidade: {selectedDoctor.specialty}
+            </p>
+            <button 
+              className={styles.changeDoctorButton}
+              onClick={() => setShowDoctorModal(true)}
+            >
+              Trocar Médico
+            </button>
+          </div>
+
+          <div className={styles.calendarWrapper}>
+            <form onSubmit={handleCreateEvent}>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 4 }}>Título *</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={eventData.title}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                  required
+                />
+              </div>
+              <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: 4 }}>Data *</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={eventData.date}
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    required
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: 4 }}>Início *</label>
+                  <input
+                    type="time"
+                    name="startTime"
+                    value={eventData.startTime}
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    required
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: 4 }}>Fim *</label>
+                  <input
+                    type="time"
+                    name="endTime"
+                    value={eventData.endTime}
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    required
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
+                <div style={{ flex: 2 }}>
+                  <label style={{ display: 'block', marginBottom: 4 }}>Procedimento *</label>
+                  <select
+                    name="procedure"
+                    value={eventData.procedure}
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    required
+                  >
+                    <option value="">Selecione um procedimento</option>
+                    {procedures.map(proc => (
+                      <option key={proc.id} value={proc.name}>{proc.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', marginBottom: 4 }}>Valor (R$) *</label>
+                  <input
+                    type="number"
+                    name="value"
+                    value={eventData.value}
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 16 }}>
+                <label style={{ display: 'block', marginBottom: 4 }}>Cor</label>
+                <input
+                  type="color"
+                  name="color"
+                  value={eventData.color}
+                  onChange={handleChange}
+                  style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer' }}
+                />
+              </div>
+              {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
+              <button type="submit" className={styles.confirmButton} style={{ width: '100%' }}>
+                Criar Compromisso
+              </button>
+            </form>
+          </div>
+
+          {events.length > 0 && (
+            <div className={styles.calendarWrapper} style={{ marginTop: 32 }}>
+              <h2 style={{ marginBottom: 16, color: '#1e293b', fontSize: '1.2rem' }}>Compromissos Criados</h2>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {events.map(ev => (
+                  <li key={ev.id} style={{
+                    background: ev.color,
+                    color: '#fff',
+                    borderRadius: 6,
+                    padding: '12px 16px',
+                    marginBottom: 12,
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+                  }}>
+                    <strong>{ev.title}</strong><br />
+                    {ev.date} | {ev.startTime} - {ev.endTime}<br />
+                    Procedimento: {ev.procedure} <br />
+                    Valor: R$ {Number(ev.value).toFixed(2)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default CalendarCreate; 

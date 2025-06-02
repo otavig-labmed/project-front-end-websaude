@@ -1,0 +1,189 @@
+/* CalendarStyle.module.css */
+.doctorCalendarContainer {
+    font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    margin: 0 auto;
+   
+    height: 100vh;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.modalContent {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.modalTitle {
+    color: #1e293b;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.doctorSelect {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #334155;
+    background-color: #fff;
+    transition: border-color 0.2s;
+}
+
+.doctorSelect:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+}
+
+.confirmButton {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.confirmButton:hover {
+    background-color: #2563eb;
+}
+
+.confirmButton:disabled {
+    background-color: #cbd5e1;
+    cursor: not-allowed;
+}
+
+.calendarHeader {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.doctorTitle {
+    color: #1e293b;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.doctorInfo {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+.changeDoctorButton {
+    padding: 0.75rem 1.5rem;
+    background-color: white;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.changeDoctorButton:hover {
+    background-color: #f8fafc;
+}
+
+.calendarWrapper {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    overflow-x: auto;
+}
+
+/* FullCalendar custom styles */
+:global(.fc) {
+    min-width: 800px;
+}
+
+:global(.fc-header-toolbar) {
+    margin-bottom: 1.5rem !important;
+    gap: 20px !important;
+}
+
+:global(.fc-button) {
+    background-color: #3b82f6 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    transition: background-color 0.2s !important;
+}
+
+:global(.fc-button:hover) {
+    background-color: #2563eb !important;
+}
+
+:global(.fc-button-primary:not(:disabled).fc-button-active) {
+    background-color: #1d4ed8 !important;
+}
+
+:global(.fc-daygrid-event) {
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+}
+
+:global(.fc-event-title) {
+    font-weight: 500;
+}
+
+.scrollContainer {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+:global(.fc-header-toolbar .fc-button) {
+    margin-right: 10px;
+}
+
+:global(.fc-header-toolbar .fc-button:last-child) {
+    margin-right: 0;
+}

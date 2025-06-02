@@ -17,6 +17,7 @@
 
 html, body {
     display: flex;
+    zoom: 0.9;
     height: 100%;
     font-family: 'Poppins', sans-serif;
     background-color: var(--background-color);

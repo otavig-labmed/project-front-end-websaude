@@ -4,7 +4,7 @@ import styles from '../styles/pages-styles/DashboardStyle.module.css';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import TooltipPortal from '../components/TooltipPortal';
 
-const DashboardHome = lazy(() => import('./subpages/DashboardHome'));
+const DashboardHome = lazy(() => import('./subpages/DashboardHome.jsx'));
 const Users = lazy(() => import('./subpages/Users'));
 const Settings = lazy(() => import('./subpages/Settings'));
 const ManagePermissions = lazy(() => import('./subpages/ManagePermissions'));

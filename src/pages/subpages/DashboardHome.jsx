@@ -1,8 +1,14 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
+import styles from '../../styles/pages-styles/DashboardHomeStyle.module.css';
+
+const DashboardHomeList = lazy(() => import("./DashboardHomeList"));
+
 const DashboardHome = () => (
-  <div>
-    <h2>Bem-vindo(a) ao Dashboard!</h2>
-    <p>Esta é a página inicial do dashboard.</p>
+  <div className={styles.dashboardHomeContainer}>
+    <Suspense fallback={<div>Carregando dashboard...</div>}>
+      <DashboardHomeList />
+    </Suspense>
   </div>
 );
+
 export default DashboardHome;

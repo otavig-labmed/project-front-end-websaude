@@ -34,6 +34,12 @@ export default defineConfig({
           react: ['react', 'react-dom'],
           router: ['react-router-dom'],
           fontawesome: ['@fortawesome/react-fontawesome', '@fortawesome/free-solid-svg-icons'],
+          fullcalendar: [
+            '@fullcalendar/core',
+            '@fullcalendar/react',
+            '@fullcalendar/daygrid',
+            '@fullcalendar/timegrid'
+          ],
         }
       }
     }
