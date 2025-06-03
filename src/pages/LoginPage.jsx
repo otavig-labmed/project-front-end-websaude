@@ -1,13 +1,14 @@
 import React, { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import ButtonBiggerActions from "../components/buttons/ButtonBiggerActions";
-import EmailInput from "../components/inputs/EmailInput";
-import PasswordInput from "../components/inputs/PasswordInput";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from '../styles/pages-styles/LoginStyle.module.css';
 import logo from '../assets/imgs/logo_websaude.webp';
 import computador from '../assets/imgs/img_computador.webp';
+
+const EmailInput = lazy(() => import("../components/inputs/EmailInput"));
+const PasswordInput = lazy(() => import("../components/inputs/PasswordInput"));
+const ButtonBiggerActions = lazy(() => import("../components/buttons/ButtonBiggerActions"));
 
 const LoginPage = () => {
   const currentYear = new Date().getFullYear();
@@ -62,6 +63,7 @@ const LoginPage = () => {
               <button>SUPORTE</button>
             </div>
             <h1>Bem-vindo</h1>
+            <hr />
             <form id="loginForm" method="POST" onSubmit={handleLogin}>
               <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />

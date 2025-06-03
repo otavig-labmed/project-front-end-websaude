@@ -137,9 +137,6 @@ html, body {
 h1 {
   font-size: clamp(1.5rem, 3vw, 2rem);
   color: var(--text-color);
-  margin-bottom: 20px;
-  border-bottom: 4px solid var(--primary-color);
-  padding-bottom: 4px;
   text-align: left;
   width: 100%;
 }
