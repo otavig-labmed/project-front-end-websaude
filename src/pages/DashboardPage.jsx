@@ -4,11 +4,13 @@ import styles from '../styles/pages-styles/DashboardStyle.module.css';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import TooltipPortal from '../components/TooltipPortal';
 
-const DashboardHome = lazy(() => import('./subpages/DashboardHome.jsx'));
+const DashboardHome = lazy(() => import('./subpages/dashboard/DashboardHome.jsx'));
 const Users = lazy(() => import('./subpages/Users'));
 const Settings = lazy(() => import('./subpages/Settings'));
 const ManagePermissions = lazy(() => import('./subpages/ManagePermissions'));
 const Calendar = lazy(() => import('./subpages/calendar/Calendar.jsx'));
+const Agreements = lazy(() => import('./subpages/agreements/Agreements.jsx'));
+const AccessBlocked = lazy(() => import('./subpages/AccessBlocked.jsx'));
 
 const DashboardPage = () => {
   const { userRole, permissions, logout } = useAuth();
@@ -44,7 +46,7 @@ const DashboardPage = () => {
   };
 
   const isMenuItemVisible = (itemName) => {
-    if (itemName === 'dashboard' || itemName === 'logout' || itemName === 'settings') return true;
+    if (itemName === 'dashboard' || itemName === 'logout' || itemName === 'settings') return true; //itemName === 'dashboard' ||
 
     switch (userRole) {
       case 'doctor':
@@ -82,14 +84,21 @@ const DashboardPage = () => {
         if (permissions.is_master > 0) {
           return <Suspense fallback={<div>Carregando...</div>}><ManagePermissions /></Suspense>;
         } else {
-          return <div><h2>Acesso negado</h2><p>Você não tem permissão para acessar esta página.</p></div>;
+          return <AccessBlocked/>;
         }
       case 'calendar':
-        if (userRole === 'doctor' || userRole === 'attendant') {
+        if (userRole === 'doctor' || userRole === 'attendant' || userRole === 'admin') {
           return <Suspense fallback={<div>Carregando...</div>}><Calendar /></Suspense>;
         } else {
-          return <div><h2>Acesso negado</h2><p>Você não tem permissão para acessar esta página.</p></div>;
+          return <AccessBlocked/>;
         }
+      case 'agreements': 
+        if(userRole == 'attendant' || userRole == 'doctor' || userRole === 'admin') {
+          return <Suspense fallback={<div>Carregando...</div>} ><Agreements /></Suspense>
+        } else {
+          return <AccessBlocked/>;
+        }
+      
       default:
         return null;
     }
@@ -97,7 +106,7 @@ const DashboardPage = () => {
 
   const menuItems = [
     { name: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
-    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendario', roles: ['doctor', 'attendant'] },
+    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendario', roles: ['doctor', 'attendant', 'admin'] },
     { name: 'findings', icon: 'fa-bug', label: 'Findings', role: 'non-doctor' },
     { name: 'engagements', icon: 'fa-clipboard-list', label: 'Engagements', role: 'non-doctor' },
     { name: 'reports', icon: 'fa-chart-bar', label: 'Reportes' },

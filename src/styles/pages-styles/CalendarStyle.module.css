@@ -157,7 +157,7 @@
 }
 
 .scrollContainer {
-    max-height: calc(100vh - 200px);
+    max-height: calc(108vh - 200px);
     overflow-y: auto;
     padding-right: 8px;
 }

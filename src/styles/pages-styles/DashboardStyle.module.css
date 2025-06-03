@@ -85,13 +85,18 @@ html {
   color: #007bff;
 }
 
+.sidebar nav ul li.logoutItem, .sidebar nav ul li.logoutItem i {
+  background-color: #ffebeb;
+  color: #dc3545;
+}
+
 .sidebar nav ul li.logoutItem:hover {
   background-color: #ffebeb;
   color: #dc3545;
 }
 
 .sidebar nav ul li.logoutItem:hover i {
-  color: #dc3545; 
+  color: #ff0019; 
 }
 
 .sidebar nav ul li i {
