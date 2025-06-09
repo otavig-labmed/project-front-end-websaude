@@ -5,49 +5,50 @@ import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from '../styles/pages-styles/LoginStyle.module.css';
 import logo from '../assets/imgs/logo_websaude.webp';
 import computador from '../assets/imgs/img_computador.webp';
+import axios from 'axios'; // Importando o axios
 
 const EmailInput = lazy(() => import("../components/inputs/EmailInput"));
 const PasswordInput = lazy(() => import("../components/inputs/PasswordInput"));
 const ButtonBiggerActions = lazy(() => import("../components/buttons/ButtonBiggerActions"));
 
 const LoginPage = () => {
-  const currentYear = new Date().getFullYear();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const token = document.cookie.split(';').find(cookie => cookie.trim().startsWith('token='));
+  //   if (token) {
+  //     navigate("/dashboard");
+  //   }
+  // }, [navigate]);
 
   async function handleLogin(e) {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/login/", 
+        { email, password },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true, // Envia o cookie automaticamente com a requisição
+        }
+      );
 
-      if (!response.ok) {
-        alert("Login inválido");
+      if (response.status !== 200) {
+        alert(`Login inválido: ${response.data.detail || 'Erro desconhecido'}`);
         return;
       }
 
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
+      alert(`${response.data.message}`);
       navigate("/dashboard");
     } catch (error) {
       console.error("Erro ao logar:", error);
       alert("Erro ao conectar com o servidor");
     }
   }
+
 
   return (
     <div className={styles.container}>
@@ -67,11 +68,10 @@ const LoginPage = () => {
             <form id="loginForm" method="POST" onSubmit={handleLogin}>
               <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
               <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
-                <ButtonBiggerActions type="submit">
+              <ButtonBiggerActions type="submit">
                 <FontAwesomeIcon icon={faSignInAlt} className={styles['icon-spacing']} />
                 Entrar
-                </ButtonBiggerActions>
-
+              </ButtonBiggerActions>
             </form>
             <p className={styles.terms}>
               Ao clicar em “Entrar”, você concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Políticas de Privacidade</a>
