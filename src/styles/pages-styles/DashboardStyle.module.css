@@ -6,9 +6,6 @@ html, body, #root {
   background: linear-gradient(135deg, var(--light-bg, #f8f9fa) 0%, #e2eafc 100%);
 }
 
-html {
-  zoom: 1; 
-}
 
 .dashboardBody {
   height: 100vh;

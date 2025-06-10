@@ -1,20 +1,55 @@
 import React, { lazy, Suspense } from "react";
+import { useAuth } from '../../../contexts/AuthContext.jsx'; 
+import BodgettMenu from '../../../components/BodgettMenu';
 
 const CalendarCreate = lazy(() => import("./CalendarCreate"));
 const CalendarList = lazy(() => import("./CalendarList"));
 const CalendarUpdate = lazy(() => import("./CalendarUpdate"));
-const BodgettMenu = lazy(() => import("../../../components/BodgettMenu"));
 
-const menuComponents = [
-  { label: "Listar compromissos", component: <Suspense fallback={<div>Carregando...</div>}><CalendarList /></Suspense> },
-  { label: "Criar compromisso", component: <Suspense fallback={<div>Carregando...</div>}><CalendarCreate /></Suspense> },
-  { label: "Atualizar compromisso", component: <Suspense fallback={<div>Carregando...</div>}><CalendarUpdate /></Suspense> }
-];
+const Calendar = () => {
+  const { permissions } = useAuth();
 
-const Calendar = () => (
-  <div>
-    <BodgettMenu components={menuComponents} />
-  </div>
-);
+  const calendarSubMenuItems = [
+    {
+      label: "Listar compromissos",
+      name: "calendar-list", 
+      component: <Suspense fallback={<div>Carregando...</div>}><CalendarList /></Suspense>,
+      permission: "agenda_visualizar"
+    },
+    {
+      label: "Criar compromisso",
+      name: "calendar-create",
+      component: <Suspense fallback={<div>Carregando...</div>}><CalendarCreate /></Suspense>,
+      permission: "agenda_criar" 
+    },
+    {
+      label: "Atualizar compromisso",
+      name: "calendar-update",
+      component: <Suspense fallback={<div>Carregando...</div>}><CalendarUpdate /></Suspense>,
+      permission: "agenda_editar" 
+    }
+  ];
 
-export default Calendar; 
+  const filteredMenuComponents = calendarSubMenuItems.filter(item => {
+    if (item.permission) {
+      return permissions.includes(item.permission);
+    }
+    return true; 
+  });
+
+  if (filteredMenuComponents.length === 0) {
+      return (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+              Você não tem permissão para visualizar nenhuma seção do Calendário.
+          </div>
+      );
+  }
+
+  return (
+    <div>
+      <BodgettMenu components={filteredMenuComponents} />
+    </div>
+  );
+};
+
+export default Calendar;

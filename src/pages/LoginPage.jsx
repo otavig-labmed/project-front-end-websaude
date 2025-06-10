@@ -5,7 +5,7 @@ import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from '../styles/pages-styles/LoginStyle.module.css';
 import logo from '../assets/imgs/logo_websaude.webp';
 import computador from '../assets/imgs/img_computador.webp';
-import axios from 'axios'; // Importando o axios
+import { useAuth } from '../contexts/AuthContext'; // Make sure the path is correct
 
 const EmailInput = lazy(() => import("../components/inputs/EmailInput"));
 const PasswordInput = lazy(() => import("../components/inputs/PasswordInput"));
@@ -15,40 +15,19 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login, isAuthenticated, isLoading } = useAuth();
 
-  // useEffect(() => {
-  //   const token = document.cookie.split(';').find(cookie => cookie.trim().startsWith('token='));
-  //   if (token) {
-  //     navigate("/dashboard");
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   async function handleLogin(e) {
     e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/login/", 
-        { email, password },
-        {
-          headers: { "Content-Type": "application/json" },
-          withCredentials: true, // Envia o cookie automaticamente com a requisição
-        }
-      );
-
-      if (response.status !== 200) {
-        alert(`Login inválido: ${response.data.detail || 'Erro desconhecido'}`);
-        return;
-      }
-
-      alert(`${response.data.message}`);
-      navigate("/dashboard");
-    } catch (error) {
-      console.error("Erro ao logar:", error);
-      alert("Erro ao conectar com o servidor");
-    }
+    await login(email, password);
   }
-
 
   return (
     <div className={styles.container}>
@@ -66,12 +45,14 @@ const LoginPage = () => {
             <h1>Bem-vindo</h1>
             <hr />
             <form id="loginForm" method="POST" onSubmit={handleLogin}>
-              <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
-              <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
-              <ButtonBiggerActions type="submit">
-                <FontAwesomeIcon icon={faSignInAlt} className={styles['icon-spacing']} />
-                Entrar
-              </ButtonBiggerActions>
+              <Suspense fallback={<div>Carregando...</div>}>
+                <EmailInput value={email} onChange={(e) => setEmail(e.target.value)} />
+                <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} />
+                <ButtonBiggerActions type="submit" disabled={isLoading}>
+                  <FontAwesomeIcon icon={faSignInAlt} className={styles['icon-spacing']} />
+                  {isLoading ? "Entrando..." : "Entrar"}
+                </ButtonBiggerActions>
+              </Suspense>
             </form>
             <p className={styles.terms}>
               Ao clicar em “Entrar”, você concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Políticas de Privacidade</a>

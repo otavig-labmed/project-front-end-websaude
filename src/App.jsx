@@ -24,13 +24,13 @@ function ProtectedRoute({ children }) {
 }
 
 const DashboardLayout = () => {
-  const { userRole, permissions } = useAuth();
+  const { permissions } = useAuth();
 
-  if (!userRole || !permissions) {
+  if (!permissions) {
     return <LoadingSpinner />;
   }
 
-  return <Outlet context={{ userRole, permissions }} />;
+  return <Outlet context={{ permissions }} />;
 };
 
 function App() {
