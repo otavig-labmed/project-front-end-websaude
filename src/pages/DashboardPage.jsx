@@ -11,12 +11,13 @@ const ManagePermissions = lazy(() => import('./subpages/ManagePermissions'));
 const Calendar = lazy(() => import('./subpages/calendar/Calendar.jsx'));
 const Agreements = lazy(() => import('./subpages/agreements/Agreements.jsx'));
 const AccessBlocked = lazy(() => import('./subpages/AccessBlocked.jsx'));
+const Alert = lazy(() => import('../components/alerts/Alert'))
 
 const DashboardPage = () => {
   const { permissions, logout } = useAuth(); 
   const navigate = useNavigate();
-  console.log("Current Permissions:", permissions);
-
+  //console.log("Current Permissions:", permissions);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [activeItem, setActiveItem] = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -211,6 +212,14 @@ const DashboardPage = () => {
     }
   }, [permissions]); 
 
+  useEffect(() => {
+    if (showWelcomeMessage) {
+      const timeout = setTimeout(() => {
+        setShowWelcomeMessage(false);
+      }, 5000); 
+      return () => clearTimeout(timeout);
+    }
+  }, [showWelcomeMessage]);
 
   return (
     <div className={styles.dashboardBody}>
@@ -281,6 +290,14 @@ const DashboardPage = () => {
             )}
           </div>
         </aside>
+
+        {showWelcomeMessage && (
+          <Suspense fallback={<div>Carregando...</div>}>
+            <Alert type="good" duration={2000}>
+              Bem-vindo ao Dashboard!
+            </Alert>
+          </Suspense>
+        )}
 
         <main className={styles.mainContent}>
           {renderContent()}

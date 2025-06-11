@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         if (Array.isArray(data)) {
           const permissionNames = data.map(p => p.nome);
           setPermissions(permissionNames);
-          console.log("Permissões carregadas:", permissionNames);
+          //console.log("Permissões carregadas:", permissionNames);
           return true;
         } else {
           console.warn("Rota de permissões retornou dados inesperados:", data);
@@ -46,36 +46,17 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const refreshToken = useCallback(async () => {
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/refresh/', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        console.log("Token renovado com sucesso!");
-        await fetchUserPermissions();
-        return true; 
-      }
-      return false; 
-    } catch (error) {
-      console.error("Erro ao renovar o token:", error);
-      clearAuthStates();
-      return false; 
-    }
-  }, [fetchUserPermissions, clearAuthStates]);
-
   const checkLoginStatus = useCallback(async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login/check", {
-        method: 'POST',
+      const response = await fetch("http://127.0.0.1:8000/api/login/check/", {
+        method: 'GET',
         credentials: 'include',  
       });
 
       if (response.ok) {
         const data = await response.json();
-        if (data.is_authenticated) {
+        //console.log(data.is_authenticated);
+        if (data.message) {
           setIsAuthenticated(true);
           setUserRole(data.role || null);
 
@@ -83,12 +64,15 @@ export const AuthProvider = ({ children }) => {
           if (permissionsFetched) {
             localStorage.setItem('hasLoggedInOnce', 'true');
           } else {
+            //console.log("Caiu 1");
             clearAuthStates();
           }
         } else {
+          //console.log("Caiu 2");
           clearAuthStates(); 
         }
       } else {
+        //console.log("Caiu 3");
         clearAuthStates();
       }
     } catch (error) {
@@ -101,15 +85,15 @@ export const AuthProvider = ({ children }) => {
     const initAuthProcess = async () => {
       setIsLoading(true);
       const hasLoggedInOnce = localStorage.getItem('hasLoggedInOnce');
-
-      if (hasLoggedInOnce === 'true') {
+      
+      // Se já logou uma vez, tenta verificar o login
+      if (hasLoggedInOnce) {
         await checkLoginStatus();
       } else {
-        setIsAuthenticated(false);
-        setUserRole(null);
-        setPermissions(null);
+        //console.log("Caiu 4");
+        clearAuthStates();
       }
-      setIsLoading(false); 
+      setIsLoading(false);
     };
 
     initAuthProcess();
@@ -117,18 +101,17 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let interval;
+
     if (isAuthenticated) {
       interval = setInterval(() => {
-        refreshToken();
-      }, 800000); // tempo de expiração do token (em ms)
+        refreshToken(); 
+      }, 800000); 
+
+      return () => clearInterval(interval);
     }
 
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isAuthenticated, refreshToken]);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const logout = useCallback(async () => {
     try {
@@ -183,6 +166,29 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
     }
   }, [fetchUserPermissions, clearAuthStates]);
+
+  const refreshToken = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/refresh-token/', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const { access_token, refresh_token } = data;
+
+        document.cookie = `access_token=${access_token}; path=/; Max-Age=${3600}`; 
+        document.cookie = `refresh_token=${refresh_token}; path=/; Max-Age=${3600 * 24}`; 
+      } else {
+        console.error('Erro ao renovar o token');
+        await logout();
+      }
+    } catch (error) {
+      console.error('Erro ao tentar renovar o token', error);
+      await logout();
+    }
+  };
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, userRole, permissions, logout, isLoading, login }}>
