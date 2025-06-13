@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   const clearAuthStates = useCallback(() => {
     setIsAuthenticated(false);
-    setUserRole(null);
+    // setUserRole(null);
     setPermissions(null);
     localStorage.removeItem('hasLoggedInOnce');
   }, []);
@@ -24,8 +24,10 @@ export const AuthProvider = ({ children }) => {
       
       if (response.ok) {
         const data = await response.json();
-        if (Array.isArray(data)) {
-          const permissionNames = data.map(p => p.nome);
+
+        if (Array.isArray(data.permissoes)) {
+          setUserRole(data.regra);
+          const permissionNames = data.permissoes.map(p => p.nome);
           setPermissions(permissionNames);
           //console.log("Permissões carregadas:", permissionNames);
           return true;
@@ -58,7 +60,6 @@ export const AuthProvider = ({ children }) => {
         //console.log(data.is_authenticated);
         if (data.message) {
           setIsAuthenticated(true);
-          setUserRole(data.role || null);
 
           const permissionsFetched = await fetchUserPermissions();
           if (permissionsFetched) {
@@ -105,13 +106,19 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       interval = setInterval(() => {
         refreshToken(); 
-      }, 800000); 
+      }, 800000); //
 
       return () => clearInterval(interval);
     }
 
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    // if (userRole !== null) { 
+    //   console.log("userRole atualizado:", userRole);
+    // }
+  }, [userRole]);
 
   const logout = useCallback(async () => {
     try {
@@ -144,7 +151,6 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setIsAuthenticated(true);
-        setUserRole(data.role || null);
         localStorage.setItem('hasLoggedInOnce', 'true');
         
         const permissionsFetched = await fetchUserPermissions();
@@ -169,17 +175,14 @@ export const AuthProvider = ({ children }) => {
 
   const refreshToken = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/refresh-token/', {
+      const response = await fetch('http://127.0.0.1:8000/api/refresh/', {
         method: 'POST',
         credentials: 'include',
       });
 
       if (response.ok) {
         const data = await response.json();
-        const { access_token, refresh_token } = data;
-
-        document.cookie = `access_token=${access_token}; path=/; Max-Age=${3600}`; 
-        document.cookie = `refresh_token=${refresh_token}; path=/; Max-Age=${3600 * 24}`; 
+        console.log(data);
       } else {
         console.error('Erro ao renovar o token');
         await logout();

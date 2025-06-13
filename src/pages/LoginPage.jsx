@@ -5,28 +5,53 @@ import { faSignInAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from '../styles/pages-styles/LoginStyle.module.css';
 import logo from '../assets/imgs/logo_websaude.webp';
 import computador from '../assets/imgs/img_computador.webp';
-import { useAuth } from '../contexts/AuthContext'; // Make sure the path is correct
+import { useAuth } from '../contexts/AuthContext';
 
 const EmailInput = lazy(() => import("../components/inputs/EmailInput"));
 const PasswordInput = lazy(() => import("../components/inputs/PasswordInput"));
 const ButtonBiggerActions = lazy(() => import("../components/buttons/ButtonBiggerActions"));
+const Alert = lazy(() => import('../components/alerts/Alert'));
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [alertStatus, setAlertStatus] = useState(null);
+
   const { login, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate]); 
+
+  useEffect(() => {
+    if (alertStatus) {
+      const timer = setTimeout(() => {
+        setAlertStatus(null); 
+      }, 2000); 
+
+      return () => clearTimeout(timer);
+    }
+  }, [alertStatus]); 
 
   async function handleLogin(e) {
-    e.preventDefault();
+    e.preventDefault(); 
 
-    await login(email, password);
+    setAlertStatus(null);
+
+    try {
+      const result = await login(email, password);
+
+      if (!result) {
+        console.log("Erro de Login: Email ou senha incorretos."); 
+        setAlertStatus("Email ou senha incorretos. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Ocorreu um erro inesperado durante o login:", error);
+      setAlertStatus("Ocorreu um erro inesperado: " + (error.message || "Verifique sua conexão."));
+    }
   }
 
   return (
@@ -57,6 +82,14 @@ const LoginPage = () => {
             <p className={styles.terms}>
               Ao clicar em “Entrar”, você concorda com nossos <a href="#">Termos de Uso</a> e <a href="#">Políticas de Privacidade</a>
             </p>
+
+            {alertStatus && (
+              <Suspense fallback={<div>Carregando...</div>}>
+                <Alert type="error" duration={2000}>
+                  {alertStatus}
+                </Alert>
+              </Suspense>
+            )}
           </div>
         </div>
       </div>

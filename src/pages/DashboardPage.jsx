@@ -5,91 +5,92 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import TooltipPortal from '../components/TooltipPortal';
 
 const DashboardHome = lazy(() => import('./subpages/dashboard/DashboardHome.jsx'));
-const Users = lazy(() => import('./subpages/Users'));
+const UserControll = lazy(() => import('./subpages/userControll/UserControll.jsx'));
 const Settings = lazy(() => import('./subpages/Settings'));
 const ManagePermissions = lazy(() => import('./subpages/ManagePermissions'));
 const Calendar = lazy(() => import('./subpages/calendar/Calendar.jsx'));
 const Agreements = lazy(() => import('./subpages/agreements/Agreements.jsx'));
 const AccessBlocked = lazy(() => import('./subpages/AccessBlocked.jsx'));
-const Alert = lazy(() => import('../components/alerts/Alert'))
+const Alert = lazy(() => import('../components/alerts/Alert'));
 
 const DashboardPage = () => {
-  const { permissions, logout } = useAuth(); 
+  const { permissions, logout, userRole } = useAuth();
   const navigate = useNavigate();
-  //console.log("Current Permissions:", permissions);
+
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
-  const [activeItem, setActiveItem] = useState('dashboard');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [hoveredItem, setHoveredItem] = useState(null);
+  const [activeItem, setActiveItem] = useState('dashboard'); 
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); 
+  const [hoveredItem, setHoveredItem] = useState(null); 
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [scrollDownHintVisible, setScrollDownHintVisible] = useState(false);
-  const navRef = useRef();
-  const scrollHintTimeout = useRef();
+  
+  const navRef = useRef(); 
+  const scrollHintTimeout = useRef(); 
 
-  const itemRefs = useRef({});
-  const lastScrollTopRef = useRef(0);
+  const itemRefs = useRef({}); 
+  const lastScrollTopRef = useRef(0); 
 
   const handleItemClick = (itemName) => {
     if (isMenuItemVisible(itemName)) {
       setActiveItem(itemName);
     } else {
-      setActiveItem('access-blocked'); 
+      setActiveItem('access-blocked');
     }
   };
 
   const handleSidebarToggle = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+
   const handleLogout = () => {
-    logout();
-    window.location.reload();
+    logout(); 
+    window.location.reload(); 
   };
 
   const handleMouseEnter = (itemName) => {
-    if (isSidebarCollapsed) {
+    if (isSidebarCollapsed) { 
       setHoveredItem(itemName);
     }
   };
 
   const handleMouseLeave = () => {
-    setHoveredItem(null);
+    setHoveredItem(null); 
   };
 
   const menuItems = [
     { name: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
-    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendario', permission: 'agenda_visualizar' },
-    { name: 'findings', icon: 'fa-bug', label: 'Findings', permission: 'findings_visualizar' }, // Added hypothetical permission
-    { name: 'engagements', icon: 'fa-clipboard-list', label: 'Engagements', permission: 'engagements_visualizar' }, // Added hypothetical permission
-    { name: 'reports', icon: 'fa-chart-bar', label: 'Reportes', permission: 'reports_visualizar' }, // Added hypothetical permission
-    { name: 'users', icon: 'fa-user', label: 'Usuários', permission: 'user_visualizar' }, // Assuming a specific permission for users
+    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário', permission: 'agenda_visualizar' },
+    { name: 'findings', icon: 'fa-bug', label: 'Findings', permission: 'findings_visualizar' }, 
+    { name: 'engagements', icon: 'fa-clipboard-list', label: 'Engagements', permission: 'engagements_visualizar' }, 
+    { name: 'reports', icon: 'fa-chart-bar', label: 'Reportes', permission: 'reports_visualizar' },
     { name: 'medical-attention', icon: 'fa-user-doctor', label: 'Atendimento Médico', permission: 'prontuario_visualizar' },
     { name: 'patients', icon: 'fa-user-plus', label: 'Pacientes', permission: 'paciente_visualizar' },
     { name: 'financial', icon: 'fa-money-bill-wave', label: 'Caixa', permission: 'financeiro_visualizar' },
-    { name: 'register-professional', icon: 'fa-file-medical', label: 'Cadastrar profissional', isMaster: true },
+    { name: 'register-professional', icon: 'fa-file-medical', label: 'Cadastrar profissional', isMaster: true }, 
     { name: 'manage-permissions', icon: 'fa-users-cog', label: 'Gerenciar Usuários', isMaster: true },
-    { name: 'agreements', icon: 'fa-handshake', label: 'Cadastro de Convênios', isMaster: true }, // Assuming isMaster or a specific permission like 'agreements_visualizar'
+    { name: 'agreements', icon: 'fa-handshake', label: 'Cadastro de Convênios', isMaster: true }, 
     { name: 'procedures', icon: 'fa-file-invoice', label: 'Procedimentos', permission: 'procedimento_visualizar' },
     { name: 'telemedicine', icon: 'fa-video', label: 'Telemedicina', permission: 'telemedicina_visualizar' },
-    { name: 'offices', icon: 'fa-building', label: 'Gestão de Consultórios', permission: 'telemedicina_visualizar' }, // Reusing telemedicine permission for offices
-    { name: 'attendant-attention', icon: 'fa-headset', label: 'Atendimento Atendente', permission: 'atendimento_atendente_visualizar' }, // Assuming a specific permission
+    { name: 'offices', icon: 'fa-building', label: 'Gestão de Consultórios', permission: 'telemedicina_visualizar' },
+    { name: 'attendant-attention', icon: 'fa-headset', label: 'Atendimento Atendente', permission: 'atendimento_atendente_visualizar' }, 
     { name: 'settings', icon: 'fa-cog', label: 'Configurações' }
   ];
 
-
   const isMenuItemVisible = (itemName) => {
+    if (userRole === 'Admin') return true;
+
     if (['dashboard', 'logout', 'settings'].includes(itemName)) return true;
 
-    const itemDefinition = menuItems.find(item => item.name === itemName);
 
     if (!itemDefinition) return false;
 
     if (itemDefinition.permission) {
-      return permissions.includes(itemDefinition.permission);
+      return permissions && permissions.includes(itemDefinition.permission);
     }
 
     if (itemDefinition.isMaster) {
-      return permissions.includes('is_master');
+      return userRole === 'Admin';
     }
 
-    return false;
+    return false; 
   };
 
   const renderContent = () => {
@@ -106,12 +107,10 @@ const DashboardPage = () => {
     switch (activeItem) {
       case 'dashboard':
         return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'users':
-        return <Suspense fallback={<div>Carregando...</div>}><Users /></Suspense>;
       case 'settings':
         return <Suspense fallback={<div>Carregando...</div>}><Settings /></Suspense>;
       case 'manage-permissions':
-        return <Suspense fallback={<div>Carregando...</div>}><ManagePermissions /></Suspense>;
+        return <Suspense fallback={<div>Carregando...</div>}><UserControll /></Suspense>;
       case 'calendar':
         return <Suspense fallback={<div>Carregando...</div>}><Calendar /></Suspense>;
       case 'agreements':
@@ -131,7 +130,7 @@ const DashboardPage = () => {
       case 'attendant-attention':
         return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
       default:
-        return <AccessBlocked/>;
+        return <AccessBlocked/>; 
     }
   };
 
@@ -149,40 +148,44 @@ const DashboardPage = () => {
         }
       }
     };
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
+    checkOverflow(); 
+    window.addEventListener('resize', checkOverflow); 
     return () => {
-      window.removeEventListener('resize', checkOverflow);
-      if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
+      window.removeEventListener('resize', checkOverflow); 
+      if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current); 
     };
   }, []);
 
   useEffect(() => {
     const el = navRef.current;
-    if (!el) return;
+    if (!el) return; 
 
     const onScroll = () => {
       if (
         el.scrollTop < lastScrollTopRef.current &&
         el.scrollTop + el.clientHeight < el.scrollHeight - 2
       ) {
-        setScrollDownHintVisible(true);
+        setScrollDownHintVisible(true); 
         if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
         scrollHintTimeout.current = setTimeout(() => setScrollDownHintVisible(false), 2000);
       } else if (el.scrollTop > lastScrollTopRef.current) {
         setScrollDownHintVisible(false);
         if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
       }
-      lastScrollTopRef.current = el.scrollTop;
+      lastScrollTopRef.current = el.scrollTop; 
     };
 
     el.addEventListener('scroll', onScroll);
-    return () => el.removeEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll); 
   }, []);
 
   useEffect(() => {
     if (permissions && Array.isArray(permissions) && permissions.length > 0) {
       const findInitialActiveItem = () => {
+        if (userRole === 'Admin') {
+            return 'dashboard'; 
+        }
+
         if (permissions.includes('dashboard_visualizar')) {
           return 'dashboard';
         }
@@ -193,7 +196,7 @@ const DashboardPage = () => {
           if (item.permission && permissions.includes(item.permission)) {
             return item.name;
           }
-          if (item.isMaster && permissions.includes('is_master')) {
+          if (item.isMaster && userRole === 'Admin') {
             return item.name;
           }
         }
@@ -203,21 +206,20 @@ const DashboardPage = () => {
 
       const initialItem = findInitialActiveItem();
 
-
       if (activeItem === 'dashboard') {
         if (initialItem && initialItem !== activeItem) {
           setActiveItem(initialItem);
         }
       }
     }
-  }, [permissions]); 
+  }, [permissions, userRole]); 
 
   useEffect(() => {
     if (showWelcomeMessage) {
       const timeout = setTimeout(() => {
         setShowWelcomeMessage(false);
       }, 5000); 
-      return () => clearTimeout(timeout);
+      return () => clearTimeout(timeout); 
     }
   }, [showWelcomeMessage]);
 
@@ -232,7 +234,6 @@ const DashboardPage = () => {
                   itemRefs.current[item.name] = React.createRef();
                 }
 
-                // Check visibility using the function
                 if (!isMenuItemVisible(item.name)) {
                   return null;
                 }
@@ -246,8 +247,10 @@ const DashboardPage = () => {
                     onMouseEnter={() => handleMouseEnter(item.name)}
                     onMouseLeave={handleMouseLeave}
                   >
+
                     <i className={`fas ${item.icon}`}></i>
                     {!isSidebarCollapsed && <span>{item.label}</span>}
+                
                     {isSidebarCollapsed && hoveredItem === item.name && (
                       <TooltipPortal targetRef={itemRefs.current[item.name]}>{item.label}</TooltipPortal>
                     )}
@@ -269,6 +272,7 @@ const DashboardPage = () => {
                 )}
               </li>
             </ul>
+
             {scrollDownHintVisible && (
               <div className={styles.scrollDownHint}>
                 <i className="fas fa-chevron-down"></i>
