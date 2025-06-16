@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect, lazy, Suspense } from "react";
+import React, { lazy, Suspense } from "react";
 
 const AgreementsList = lazy(() => import('./AgreementsList'));
+const AgreementsCreate = lazy(() => import('./AgreementsCreate'))
 const BodgettMenu = lazy(() => import("../../../components/BodgettMenu"));
 
 const menuComponents = [
-  { label: "Listar convênios", component: <Suspense fallback={<div>Carregando...</div>}><AgreementsList /></Suspense> },
+  { label: "Listar Convênios", component: <Suspense fallback={<div>Carregando...</div>}><AgreementsList /></Suspense> },
+  { label: "Cadastrar Convênio", component: <Suspense fallback={<div>Carregando...</div>}><AgreementsCreate /></Suspense> },
 ];
 
 

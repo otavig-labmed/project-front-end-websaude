@@ -130,6 +130,7 @@ const CalendarCreate = () => {
                 <input
                   type="text"
                   name="title"
+                  placeholder="Ex: Ultrassom"
                   value={eventData.title}
                   onChange={handleChange}
                   style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
@@ -201,16 +202,7 @@ const CalendarCreate = () => {
                   />
                 </div>
               </div>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4 }}>Cor</label>
-                <input
-                  type="color"
-                  name="color"
-                  value={eventData.color}
-                  onChange={handleChange}
-                  style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer' }}
-                />
-              </div>
+              <br />
               {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
               <button type="submit" className={styles.confirmButton} style={{ width: '100%' }}>
                 Criar Compromisso

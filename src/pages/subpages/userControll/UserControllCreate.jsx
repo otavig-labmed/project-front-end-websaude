@@ -1,335 +1,564 @@
 import React, { useState, useEffect } from "react";
-// Importar estilos de forma consistente
 import styles from '../../../styles/pages-styles/UserControllStyle.module.css';
-// Importar useNavigate e useParams para gerenciar a rota e IDs
 import { useNavigate, useParams } from 'react-router-dom';
 
-// O componente UserControllCreate agora gerencia seu próprio estado e lógica.
-// Ele não recebe mais props de dados ou manipulação de formulário,
-// mas ainda pode receber props como `userTypes` e `statusOptions` se forem globais
-// ou fetched de um contexto. Para este exemplo, vamos simular o fetch deles aqui.
 const UserControllCreate = () => {
-  // Use useParams para obter o ID do usuário da URL (se estiver no modo de edição)
-  const { id: userIdFromRoute } = useParams();
-  const navigate = useNavigate(); // Hook para navegação
+	const { id: userIdFromRoute } = useParams();
+	const navigate = useNavigate();
 
-  // Estados locais para os campos do formulário
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [userType, setUserType] = useState(""); // Valor inicial vazio
-  const [status, setStatus] = useState(""); // Valor inicial vazio
+	// Estados básicos
+	const [nome, setNome] = useState("");
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [cpf, setCpf] = useState("");
+	const [rg, setRg] = useState("");
+	const [endereco, setEndereco] = useState("");
+	const [telefone, setTelefone] = useState("");
+	const [regra, setRegra] = useState("Patient");
+	const [is_active, setIsActive] = useState(true);
 
-  // Estados para carregamento e mensagens de feedback
-  const [loading, setLoading] = useState(true); // Para carregar dados do usuário ou opções
-  const [saving, setSaving] = useState(false); // Para quando o formulário está sendo enviado
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+	// Estados para Médico
+	const [crm, setCrm] = useState("");
+	const [especialidade, setEspecialidade] = useState("");
 
-  // Estados para as opções de select (simulando fetch de API)
-  const [userTypesOptions, setUserTypesOptions] = useState([]);
-  const [statusOptionsList, setStatusOptionsList] = useState([]);
+	// Estados para Paciente
+	const [plano_saude, setPlanoSaude] = useState("");
+	const [tipo_sanguineo, setTipoSanguineo] = useState("");
+	const [contato_emergencia, setContatoEmergencia] = useState("");
 
-  // Determine se estamos no modo de edição
-  const isEditing = !!userIdFromRoute;
+	const permissoesPadrao = {
+		Admin: {
+			dashboard: true,
+			criar_usuario: true,
+			editar_usuario: true,
+			visualizar_prontuarios: true,
+			criar_prontuarios: true,
+			agendar_consultas: true,
+			relatorios: true,
+			configuracoes: true
+		},
+		Attendant: {
+			dashboard: true,
+			criar_usuario: false,
+			editar_usuario: false,
+			visualizar_prontuarios: true,
+			criar_prontuarios: false,
+			agendar_consultas: true,
+			relatorios: false,
+			configuracoes: false
+		},
+		Doctor: {
+			dashboard: true,
+			criar_usuario: false,
+			editar_usuario: false,
+			visualizar_prontuarios: true,
+			criar_prontuarios: true,
+			agendar_consultas: true,
+			relatorios: false,
+			configuracoes: false
+		},
+		Patient: {
+			dashboard: true,
+			criar_usuario: false,
+			editar_usuario: false,
+			visualizar_prontuarios: false,
+			criar_prontuarios: false,
+			agendar_consultas: false,
+			relatorios: false,
+			configuracoes: false
+		}
+	};
 
-  // --- Funções de Simulação de API ---
-  // Em uma aplicação real, estas seriam chamadas a um backend
-  const fetchUserTypes = async () => {
-    // Simula uma chamada de API para obter tipos de usuário
-    return new Promise(resolve => setTimeout(() => {
-      resolve(["Administrador", "Atendente", "Médico", "Paciente"]);
-    }, 300));
-  };
+	// Estado para permissões
+	const [permissoes, setPermissoes] = useState(permissoesPadrao.Patient);
 
-  const fetchStatusOptions = async () => {
-    // Simula uma chamada de API para obter opções de status
-    return new Promise(resolve => setTimeout(() => {
-      resolve(["Ativo", "Inativo", "Pendente"]);
-    }, 300));
-  };
+	// Estados auxiliares
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [errorMessage, setErrorMessage] = useState(null);
+	const [successMessage, setSuccessMessage] = useState(null);
 
-  const fetchUserData = async (id) => {
-    // Simula uma chamada de API para obter dados de um usuário existente
-    return new Promise((resolve, reject) => setTimeout(() => {
-      if (id === "123") { // Exemplo de um usuário mock
-        resolve({
-          name: "João Silva",
-          email: "joao.silva@example.com",
-          userType: "Médico",
-          status: "Ativo"
-        });
-      } else {
-        reject(new Error("Usuário não encontrado."));
-      }
-    }, 500));
-  };
+	// Opções para selects
+	const regraOptions = [
+		{ value: 'Admin', label: 'Administrador' },
+		{ value: 'Attendant', label: 'Atendente' },
+		{ value: 'Doctor', label: 'Médico' },
+		{ value: 'Patient', label: 'Paciente' }
+	];
 
-  const saveUserData = async (userData, id) => {
-    // Simula uma chamada de API para criar ou atualizar um usuário
-    return new Promise((resolve, reject) => setTimeout(() => {
-      if (id) {
-        console.log("Atualizando usuário:", id, userData);
-        // Simula erro de atualização para demonstração
-        if (userData.email === "erro@email.com") {
-          reject(new Error("Erro ao atualizar o e-mail."));
-        } else {
-          resolve({ id: id, ...userData, message: "Usuário atualizado com sucesso!" });
-        }
-      } else {
-        console.log("Criando novo usuário:", userData);
-        // Simula erro de criação para demonstração
-        if (userData.email === "erro@email.com") {
-          reject(new Error("E-mail já cadastrado."));
-        } else {
-          resolve({ id: "novoID123", ...userData, message: "Usuário criado com sucesso!" });
-        }
-      }
-    }, 1000));
-  };
-  // --- Fim das Funções de Simulação de API ---
+	const tipoSanguineoOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+	const estadoCivilOptions = ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'Separado(a)'];
+	const sexoOptions = ['Masculino', 'Feminino', 'Outro', 'Prefiro não dizer'];
 
+	const isEditing = !!userIdFromRoute;
 
-  // useEffect para carregar dados do usuário (se for edição) e opções de select
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      setErrorMessage(null);
-      setSuccessMessage(null);
-      try {
-        // Carrega opções para os selects
-        const types = await fetchUserTypes();
-        setUserTypesOptions(types);
-        setUserType(types[0] || ""); // Define o primeiro como padrão
+	// Função para atualizar permissões quando o tipo de usuário muda
+	const handleRegraChange = (e) => {
+		const novaRegra = e.target.value;
+		setRegra(novaRegra);
+		setPermissoes(permissoesPadrao[novaRegra]);
+	};
 
-        const statuses = await fetchStatusOptions();
-        setStatusOptionsList(statuses);
-        setStatus(statuses[0] || ""); // Define o primeiro como padrão
+	// Simulação de API
+	const fetchUserData = async (id) => {
+		return new Promise((resolve) => setTimeout(() => {
+			resolve({
+				nome: "João Silva",
+				email: "joao.silva@example.com",
+				cpf: "12345678901",
+				rg: "123456789",
+				endereco: "Rua Exemplo, 123",
+				telefone: "11987654321",
+				regra: "Doctor",
+				is_active: true,
+				crm: "CRM/SP 123456",
+				especialidade: "Cardiologia",
+				plano_saude: "Unimed",
+				tipo_sanguineo: "A+",
+				contato_emergencia: "Maria Silva (11) 98765-4321",
+				permissoes: permissoesPadrao['Doctor']
+			});
+		}, 500));
+	};
 
-        // Se estiver editando, carrega os dados do usuário
-        if (isEditing) {
-          const userData = await fetchUserData(userIdFromRoute);
-          setName(userData.name || "");
-          setEmail(userData.email || "");
-          setUserType(userData.userType || types[0] || "");
-          setStatus(userData.status || statuses[0] || "");
-          setPassword(""); // Senha nunca é pré-preenchida por segurança
-        } else {
-          // No modo de criação, garante que os campos estejam limpos
-          setName("");
-          setEmail("");
-          setPassword("");
-          setUserType(types[0] || "");
-          setStatus(statuses[0] || "");
-        }
-      } catch (error) {
-        console.error("Erro ao carregar dados:", error);
-        setErrorMessage(`Falha ao carregar dados: ${error.message}`);
-      } finally {
-        setLoading(false);
-      }
-    };
+	const saveUserData = async (userData, id) => {
+		return new Promise((resolve) => setTimeout(() => {
+			console.log(id ? "Atualizando usuário" : "Criando usuário", userData);
+			resolve({
+				id: id || "novoID123",
+				...userData,
+				message: id ? "Usuário atualizado!" : "Usuário criado!"
+			});
+		}, 1000));
+	};
 
-    loadData();
-  }, [userIdFromRoute, isEditing]); // Dependências: re-executa se o ID ou modo de edição mudar
+	useEffect(() => {
+		const loadData = async () => {
+			setLoading(true);
+			try {
+				if (isEditing) {
+					const userData = await fetchUserData(userIdFromRoute);
+					setNome(userData.nome);
+					setEmail(userData.email);
+					setCpf(userData.cpf);
+					setRg(userData.rg);
+					setEndereco(userData.endereco);
+					setTelefone(userData.telefone);
+					setRegra(userData.regra);
+					setIsActive(userData.is_active);
 
-  // Função para lidar com a mudança em qualquer campo de input/select
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    switch (name) {
-      case "name":
-        setName(value);
-        break;
-      case "email":
-        setEmail(value);
-        break;
-      case "password":
-        setPassword(value);
-        break;
-      case "userType":
-        setUserType(value);
-        break;
-      case "status":
-        setStatus(value);
-        break;
-      default:
-        break;
-    }
-  };
+					if (userData.regra === 'Doctor') {
+						setCrm(userData.crm);
+						setEspecialidade(userData.especialidade);
+					}
 
-  // Função para lidar com o envio do formulário
-  const handleSubmit = async (e) => {
-    e.preventDefault(); // Previne o recarregamento da página
+					if (userData.regra === 'Patient') {
+						setPlanoSaude(userData.plano_saude);
+						setTipoSanguineo(userData.tipo_sanguineo);
+						setContatoEmergencia(userData.contato_emergencia);
+					}
 
-    setSaving(true); // Indica que a operação de salvamento está em andamento
-    setErrorMessage(null); // Limpa mensagens de erro anteriores
-    setSuccessMessage(null); // Limpa mensagens de sucesso anteriores
+					setPermissoes(userData.permissoes || permissoesPadrao[userData.regra]);
+				}
+			} catch (error) {
+				setErrorMessage(`Erro ao carregar: ${error.message}`);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-    // Cria um objeto com os dados do formulário
-    const userData = {
-      name,
-      email,
-      userType,
-      status,
-    };
+		loadData();
+	}, [userIdFromRoute, isEditing]);
 
-    // Apenas inclui a senha se ela foi digitada (necessário para criação ou atualização)
-    if (password) {
-      userData.password = password;
-    }
+	const handlePermissaoChange = (permissao) => {
+		setPermissoes(prev => ({
+			...prev,
+			[permissao]: !prev[permissao]
+		}));
+	};
 
-    try {
-      // Chama a função de salvamento de dados (criar ou atualizar)
-      const result = await saveUserData(userData, isEditing ? userIdFromRoute : null);
-      setSuccessMessage(result.message || (isEditing ? "Usuário atualizado!" : "Usuário criado!"));
-      // Se for criação, opcionalmente limpa o formulário
-      if (!isEditing) {
-        setName("");
-        setEmail("");
-        setPassword("");
-        setUserType(userTypesOptions[0] || "");
-        setStatus(statusOptionsList[0] || "");
-      }
-      // Opcional: Navegar após um pequeno atraso para o usuário ver a mensagem de sucesso
-      setTimeout(() => navigate('/users'), 1500); // Navega para a lista de usuários
-    } catch (error) {
-      console.error("Erro ao salvar usuário:", error);
-      setErrorMessage(`Falha ao salvar: ${error.message}`);
-    } finally {
-      setSaving(false); // Finaliza a operação de salvamento
-    }
-  };
+	const handleSubmit = async (e) => {
+		e.preventDefault();
+		setSaving(true);
+		setErrorMessage(null);
 
-  // Função para lidar com o cancelamento da edição/criação
-  const handleCancel = () => {
-    navigate('/users'); // Navega de volta para a lista de usuários
-  };
+		const userData = {
+			nome,
+			email,
+			cpf,
+			rg,
+			endereco,
+			telefone,
+			regra,
+			is_active,
+			permissoes
+		};
 
-  if (loading) {
-    return (
-      <div className={styles.card}>
-        <h2 className={styles.cardTitle}>Carregando...</h2>
-        <p>Aguarde enquanto os dados são carregados.</p>
-      </div>
-    );
-  }
+		if (password) {
+			userData.password = password;
+		}
 
-  return (
-    <div className={styles.card}>
-      <h2 className={styles.cardTitle}>
-        {isEditing ? "Editar Usuário" : "Criar Usuário"}
-      </h2>
+		if (regra === 'Doctor') {
+			userData.crm = crm;
+			userData.especialidade = especialidade;
+		}
 
-      {errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-      {successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+		if (regra === 'Patient') {
+			userData.plano_saude = plano_saude;
+			userData.tipo_sanguineo = tipo_sanguineo;
+			userData.contato_emergencia = contato_emergencia;
+		}
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label htmlFor="name">Nome Completo</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={name}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
+		try {
+			const result = await saveUserData(userData, isEditing ? userIdFromRoute : null);
+			setSuccessMessage(result.message);
 
-          <div className={styles.formGroup}>
-            <label htmlFor="email">E-mail</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-        </div>
+			if (!isEditing) {
+				resetForm();
+			}
+		} catch (error) {
+			setErrorMessage(`Erro ao salvar: ${error.message}`);
+		} finally {
+			setSaving(false);
+		}
+	};
 
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Senha</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={password}
-              onChange={handleInputChange}
-              // A senha é obrigatória apenas para criação de novo usuário
-              required={!isEditing}
-            />
-          </div>
+	const resetForm = () => {
+		setNome("");
+		setEmail("");
+		setPassword("");
+		setCpf("");
+		setRg("");
+		setEndereco("");
+		setTelefone("");
+		setRegra("Patient");
+		setIsActive(true);
+		setCrm("");
+		setEspecialidade("");
+		setPlanoSaude("");
+		setTipoSanguineo("");
+		setContatoEmergencia("");
+		setPermissoes(permissoesPadrao.Patient);
+	};
 
-          <div className={styles.formGroup}>
-            <label htmlFor="userType">Tipo de Usuário</label>
-            <select
-              id="userType"
-              name="userType"
-              value={userType}
-              onChange={handleInputChange}
-              required
-            >
-              {userTypesOptions.length > 0 ? (
-                userTypesOptions.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))
-              ) : (
-                <option value="">Carregando tipos...</option>
-              )}
-            </select>
-          </div>
+	const handleCancel = () => {
+		navigate('/users');
+	};
 
-          <div className={styles.formGroup}>
-            <label htmlFor="status">Status</label>
-            <select
-              id="status"
-              name="status"
-              value={status}
-              onChange={handleInputChange}
-              required
-            >
-              {statusOptionsList.length > 0 ? (
-                statusOptionsList.map((statusOption) => (
-                  <option key={statusOption} value={statusOption}>
-                    {statusOption}
-                  </option>
-                ))
-              ) : (
-                <option value="">Carregando status...</option>
-              )}
-            </select>
-          </div>
-        </div>
+	if (loading) {
+		return (
+			<div className={styles.card}>
+				<h2 className={styles.cardTitle}>Carregando...</h2>
+			</div>
+		);
+	}
 
-        <div className={styles.formActions}>
-          {isEditing && ( // Botão 'Cancelar' aparece apenas no modo de edição
-            <button
-              type="button"
-              onClick={handleCancel} // Agora chama a função handleCancel interna
-              className={styles.cancelButton}
-              disabled={saving}
-            >
-              Cancelar
-            </button>
-          )}
+	return (
+		<div className={styles["page-container"]}>
+			<div className={styles.card}>
+				<h2 className={styles.cardTitle}>
+					{isEditing ? "Editar Usuário" : "Criar Usuário"}
+				</h2>
 
-          <button
-            type="submit"
-            className={styles.submitButton}
-            disabled={saving} // Desabilita durante o salvamento
-          >
-            {saving ? "Salvando..." : (isEditing ? "Atualizar Usuário" : "Criar Usuário")}
-          </button>
-        </div>
-      </form>
-    </div>
-  );
+				{errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+				{successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+
+				<br />
+				<form onSubmit={handleSubmit} className={styles.form}>
+					<div className={styles.formGrid}>
+						<div className={styles.formGroup}>
+							<label htmlFor="nome">Nome Completo*</label>
+							<input
+								type="text"
+								id="nome"
+								placeholder="Ex: João Almeida dos Santos"
+								value={nome}
+								onChange={(e) => setNome(e.target.value)}
+								required
+							/>
+						</div>
+
+						<div className={styles.formGroup}>
+							<label htmlFor="email">E-mail*</label>
+							<input
+								type="email"
+								id="email"
+								placeholder="Ex: joaoalmeida@gmail.com"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								required
+							/>
+						</div>
+					</div>
+
+					<div className={styles.formGrid}>
+						<div className={styles.formGroup}>
+							<label htmlFor="password">Senha {!isEditing && "(Opcional)"}</label>
+							<input
+								type="password"
+								id="password"
+								value={password}
+								onChange={(e) => setPassword(e.target.value)}
+								placeholder={isEditing ? "Deixe em branco para manter a atual" : ""}
+							/>
+						</div>
+
+						<div className={styles.formGroup}>
+							<label htmlFor="regra">Tipo de Usuário*</label>
+							<select
+								id="regra"
+								value={regra}
+								onChange={handleRegraChange}
+								required
+							>
+								{regraOptions.map((option) => (
+									<option key={option.value} value={option.value}>
+										{option.label}
+									</option>
+								))}
+							</select>
+						</div>
+					</div>
+
+					<div className={styles.formGrid}>
+						<div className={styles.formGroup}>
+							<label htmlFor="cpf">CPF</label>
+							<input
+								type="text"
+								id="cpf"
+								placeholder="Ex: 000.000.000-00"
+								value={cpf}
+								onChange={(e) => setCpf(e.target.value)}
+								maxLength="11"
+							/>
+						</div>
+
+						<div className={styles.formGroup}>
+							<label htmlFor="rg">RG</label>
+							<input
+								type="text"
+								id="rg"
+								placeholder="Ex: 00.000.000-0"
+								value={rg}
+								onChange={(e) => setRg(e.target.value)}
+								maxLength="9"
+							/>
+						</div>
+					</div>
+
+					<div className={styles.formGrid}>
+						<div className={styles.formGroup}>
+							<label htmlFor="endereco">Endereço*</label>
+							<input
+								type="text"
+								id="endereco"
+								placeholder="Ex: Rua Joaquim Nabuco, 402 - Casa"
+								value={endereco}
+								onChange={(e) => setEndereco(e.target.value)}
+								required
+							/>
+						</div>
+
+						<div className={styles.formGroup}>
+							<label htmlFor="telefone">Telefone</label>
+							<input
+								type="text"
+								id="telefone"
+								value={telefone}
+								onChange={(e) => setTelefone(e.target.value)}
+								maxLength="15"
+								placeholder="(00) 00000-0000"
+							/>
+						</div>
+					</div>
+
+					{/* Campos específicos para Médico */}
+					{regra === 'Doctor' && (
+						<div className={styles.formGrid}>
+							<div className={styles.formGroup}>
+								<label htmlFor="crm">CRM*</label>
+								<input
+									type="text"
+									id="crm"
+									value={crm}
+									onChange={(e) => setCrm(e.target.value)}
+									required
+									placeholder="CRM/UF 123456"
+								/>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label htmlFor="especialidade">Especialidade*</label>
+								<input
+									type="text"
+									id="especialidade"
+									value={especialidade}
+									onChange={(e) => setEspecialidade(e.target.value)}
+									required
+								/>
+							</div>
+						</div>
+					)}
+
+					{/* Campos específicos para Paciente */}
+					{regra === 'Patient' && (
+						<>
+							<div className={styles.formGrid}>
+								<div className={styles.formGroup}>
+									<label htmlFor="plano_saude">Plano de Saúde</label>
+									<input
+										type="text"
+										id="plano_saude"
+										value={plano_saude}
+										onChange={(e) => setPlanoSaude(e.target.value)}
+									/>
+								</div>
+
+								<div className={styles.formGroup}>
+									<label htmlFor="tipo_sanguineo">Tipo Sanguíneo</label>
+									<select
+										id="tipo_sanguineo"
+										value={tipo_sanguineo}
+										onChange={(e) => setTipoSanguineo(e.target.value)}
+									>
+										<option value="">Selecione</option>
+										{tipoSanguineoOptions.map(tipo => (
+											<option key={tipo} value={tipo}>{tipo}</option>
+										))}
+									</select>
+								</div>
+							</div>
+
+							<div className={styles.formGroup}>
+								<label htmlFor="contato_emergencia">Contato de Emergência</label>
+								<input
+									type="text"
+									id="contato_emergencia"
+									value={contato_emergencia}
+									onChange={(e) => setContatoEmergencia(e.target.value)}
+									placeholder="Nome e telefone"
+								/>
+							</div>
+						</>
+					)}
+
+					{/* Seção de Permissões */}
+					<details className={styles.permissionsSection} open>
+						<summary className={styles.permissionsSummary}>Permissões do Usuário</summary>
+
+						<div className={styles.permissionsGrid}>
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.dashboard}
+										onChange={() => handlePermissaoChange('dashboard')}
+									/>
+									Visualizar Dashboard
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.criar_usuario}
+										onChange={() => handlePermissaoChange('criar_usuario')}
+									/>
+									Criar Usuários
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.editar_usuario}
+										onChange={() => handlePermissaoChange('editar_usuario')}
+									/>
+									Editar Usuários
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.visualizar_prontuarios}
+										onChange={() => handlePermissaoChange('visualizar_prontuarios')}
+									/>
+									Visualizar Prontuários
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.criar_prontuarios}
+										onChange={() => handlePermissaoChange('criar_prontuarios')}
+									/>
+									Criar Prontuários
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.agendar_consultas}
+										onChange={() => handlePermissaoChange('agendar_consultas')}
+									/>
+									Agendar Consultas
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.relatorios}
+										onChange={() => handlePermissaoChange('relatorios')}
+									/>
+									Gerar Relatórios
+								</label>
+							</div>
+
+							<div className={styles.permissionItem}>
+								<label>
+									<input
+										type="checkbox"
+										checked={permissoes.configuracoes}
+										onChange={() => handlePermissaoChange('configuracoes')}
+									/>
+									Acessar Configurações
+								</label>
+							</div>
+						</div>
+					</details>
+
+					<div className={styles.formActions}>
+						<button
+							type="button"
+							onClick={handleCancel}
+							className={styles.cancelButton}
+							disabled={saving}
+						>
+							Cancelar
+						</button>
+
+						<button
+							type="submit"
+							className={styles.submitButton}
+							disabled={saving}
+						>
+							{saving ? "Salvando..." : (isEditing ? "Atualizar" : "Criar")}
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	);
 };
 
 export default UserControllCreate;

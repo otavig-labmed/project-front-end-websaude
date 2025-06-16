@@ -106,7 +106,7 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       interval = setInterval(() => {
         refreshToken(); 
-      }, 800000); //
+      }, 800000); 
 
       return () => clearInterval(interval);
     }

@@ -1,0 +1,168 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+  padding: 24px 20px;
+  margin-bottom: 20%;
+  overflow-y: auto;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 100;
+  padding: 16px 0;
+  /*box-shadow: 0 2px 4px rgba(0,0,0,0.05);*/
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.formGroup label:hover {  
+  cursor: pointer;
+}
+
+.formGroup input,
+.formGroup select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.formGroup select {
+  background-color: white;
+}
+
+.cardTitle {
+  color: #64748b;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.reportControls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.dateRangeContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.formControl {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 8px;
+}
+
+.submitButton {
+  padding: 10px 16px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.filterButton {
+  padding: 10px 15px;
+  background-color: #e2e8f0;
+  color: #64748b;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterButton:hover {
+  background-color: #d1d5db;
+}
+
+.generateButtonContainer {
+  margin-top: 15px;
+  text-align: right;
+}
+
+.reportPreview {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  background-color: white;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.previewContent {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .dateRangeContainer {
+        grid-template-columns: 1fr;
+    }
+    
+    .generateButtonContainer {
+        text-align: center;
+    }
+}
+
+.scrollContainer {
+  max-height: calc(108vh - 200px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

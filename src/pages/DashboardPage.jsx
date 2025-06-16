@@ -4,13 +4,15 @@ import styles from '../styles/pages-styles/DashboardStyle.module.css';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import TooltipPortal from '../components/TooltipPortal';
 
-const DashboardHome = lazy(() => import('./subpages/dashboard/DashboardHome.jsx'));
+const DashboardHome = lazy(() => import('./subpages/dashboard/DashboardHome'));
+const Report = lazy(() => import('./subpages/report/Report'));
 const UserControll = lazy(() => import('./subpages/userControll/UserControll.jsx'));
 const Settings = lazy(() => import('./subpages/Settings'));
 const ManagePermissions = lazy(() => import('./subpages/ManagePermissions'));
 const Calendar = lazy(() => import('./subpages/calendar/Calendar.jsx'));
 const Agreements = lazy(() => import('./subpages/agreements/Agreements.jsx'));
 const AccessBlocked = lazy(() => import('./subpages/AccessBlocked.jsx'));
+const Findings = lazy(() => import('./subpages/findings/Findings.jsx'));
 const Alert = lazy(() => import('../components/alerts/Alert'));
 
 const DashboardPage = () => {
@@ -18,20 +20,61 @@ const DashboardPage = () => {
   const navigate = useNavigate();
 
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
-  const [activeItem, setActiveItem] = useState('dashboard'); 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false); 
-  const [hoveredItem, setHoveredItem] = useState(null); 
+  const [activeItem, setActiveItem] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState(null);
   const [showScrollDown, setShowScrollDown] = useState(false);
   const [scrollDownHintVisible, setScrollDownHintVisible] = useState(false);
-  
-  const navRef = useRef(); 
-  const scrollHintTimeout = useRef(); 
 
-  const itemRefs = useRef({}); 
-  const lastScrollTopRef = useRef(0); 
+  const navRef = useRef();
+  const scrollHintTimeout = useRef();
+
+  const itemRefs = useRef({});
+  const lastScrollTopRef = useRef(0);
+
+  const menuItems = [
+    { name: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard', permission: 'dashboard_visualizar' },
+    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário', permission: 'agenda_visualizar' },
+    { name: 'engagements', icon: 'fa-clipboard-list', label: 'Compromissos', permission: 'engagements_visualizar' },
+    { name: 'reports', icon: 'fa-chart-bar', label: 'Relatórios', permission: 'reportes_visualizar' },
+    { name: 'medical-attention', icon: 'fa-user-doctor', label: 'Atendimento Médico', permission: 'prontuario_visualizar' },
+    { name: 'patients', icon: 'fa-user-plus', label: 'Pacientes', permission: 'paciente_visualizar' },
+    { name: 'financial', icon: 'fa-money-bill-wave', label: 'Caixa', permission: 'financeiro_visualizar' },
+    { name: 'manage-permissions', icon: 'fa-users-cog', label: 'Gerenciar Usuários', isMaster: true },
+    { name: 'agreements', icon: 'fa-handshake', label: 'Cadastro de Convênios', isMaster: true },
+    { name: 'procedures', icon: 'fa-file-invoice', label: 'Procedimentos', permission: 'procedimento_visualizar' },
+    { name: 'telemedicine', icon: 'fa-video', label: 'Telemedicina', permission: 'telemedicina_visualizar' },
+    { name: 'offices', icon: 'fa-building', label: 'Gestão de Consultórios', permission: 'telemedicina_visualizar' },
+    { name: 'attendant-attention', icon: 'fa-headset', label: 'Atendimento Atendente', permission: 'atendimento_atendente_visualizar' },
+    { name: 'findings', icon: 'fa-bug', label: 'Relatar_Bugs', permission: 'findings_visualizar' },
+    { name: 'settings', icon: 'fa-cog', label: 'Configurações' },
+  ];
+
+  const isMenuItemVisible = (itemName, itemDefinition = null) => {
+    if (['dashboard', 'logout', 'settings'].includes(itemName)) {
+      return true;
+    }
+
+    const currentItemDefinition = itemDefinition || menuItems.find(item => item.name === itemName);
+
+    if (!currentItemDefinition) {
+      return false;
+    }
+
+    if (currentItemDefinition.permission) {
+      return permissions && Array.isArray(permissions) && permissions.includes(currentItemDefinition.permission);
+    }
+
+    if (currentItemDefinition.isMaster) {
+      return userRole === 'Admin';
+    }
+
+    return false;
+  };
 
   const handleItemClick = (itemName) => {
-    if (isMenuItemVisible(itemName)) {
+    const itemDefinition = menuItems.find(item => item.name === itemName);
+    if (isMenuItemVisible(itemName, itemDefinition)) {
       setActiveItem(itemName);
     } else {
       setActiveItem('access-blocked');
@@ -41,56 +84,18 @@ const DashboardPage = () => {
   const handleSidebarToggle = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
   const handleLogout = () => {
-    logout(); 
-    window.location.reload(); 
+    logout();
+    window.location.reload();
   };
 
   const handleMouseEnter = (itemName) => {
-    if (isSidebarCollapsed) { 
+    if (isSidebarCollapsed) {
       setHoveredItem(itemName);
     }
   };
 
   const handleMouseLeave = () => {
-    setHoveredItem(null); 
-  };
-
-  const menuItems = [
-    { name: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard' },
-    { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário', permission: 'agenda_visualizar' },
-    { name: 'findings', icon: 'fa-bug', label: 'Findings', permission: 'findings_visualizar' }, 
-    { name: 'engagements', icon: 'fa-clipboard-list', label: 'Engagements', permission: 'engagements_visualizar' }, 
-    { name: 'reports', icon: 'fa-chart-bar', label: 'Reportes', permission: 'reports_visualizar' },
-    { name: 'medical-attention', icon: 'fa-user-doctor', label: 'Atendimento Médico', permission: 'prontuario_visualizar' },
-    { name: 'patients', icon: 'fa-user-plus', label: 'Pacientes', permission: 'paciente_visualizar' },
-    { name: 'financial', icon: 'fa-money-bill-wave', label: 'Caixa', permission: 'financeiro_visualizar' },
-    { name: 'register-professional', icon: 'fa-file-medical', label: 'Cadastrar profissional', isMaster: true }, 
-    { name: 'manage-permissions', icon: 'fa-users-cog', label: 'Gerenciar Usuários', isMaster: true },
-    { name: 'agreements', icon: 'fa-handshake', label: 'Cadastro de Convênios', isMaster: true }, 
-    { name: 'procedures', icon: 'fa-file-invoice', label: 'Procedimentos', permission: 'procedimento_visualizar' },
-    { name: 'telemedicine', icon: 'fa-video', label: 'Telemedicina', permission: 'telemedicina_visualizar' },
-    { name: 'offices', icon: 'fa-building', label: 'Gestão de Consultórios', permission: 'telemedicina_visualizar' },
-    { name: 'attendant-attention', icon: 'fa-headset', label: 'Atendimento Atendente', permission: 'atendimento_atendente_visualizar' }, 
-    { name: 'settings', icon: 'fa-cog', label: 'Configurações' }
-  ];
-
-  const isMenuItemVisible = (itemName) => {
-    if (userRole === 'Admin') return true;
-
-    if (['dashboard', 'logout', 'settings'].includes(itemName)) return true;
-
-
-    if (!itemDefinition) return false;
-
-    if (itemDefinition.permission) {
-      return permissions && permissions.includes(itemDefinition.permission);
-    }
-
-    if (itemDefinition.isMaster) {
-      return userRole === 'Admin';
-    }
-
-    return false; 
+    setHoveredItem(null);
   };
 
   const renderContent = () => {
@@ -100,7 +105,7 @@ const DashboardPage = () => {
 
     const itemDefinition = menuItems.find(item => item.name === activeItem);
 
-    if (!itemDefinition || !isMenuItemVisible(activeItem)) {
+    if (!itemDefinition || !isMenuItemVisible(activeItem, itemDefinition)) {
       return <AccessBlocked />;
     }
 
@@ -115,22 +120,26 @@ const DashboardPage = () => {
         return <Suspense fallback={<div>Carregando...</div>}><Calendar /></Suspense>;
       case 'agreements':
         return <Suspense fallback={<div>Carregando...</div>}><Agreements /></Suspense>;
-      case 'medical-attention':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'patients':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'financial':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'procedures':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'telemedicine':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'offices':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'attendant-attention':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      case 'findings':
+        return <Suspense fallback={<div>Carregando...</div>}><Findings/></Suspense>
+      // case 'medical-attention':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'patients':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'financial':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'procedures':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'telemedicine':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'offices':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      // case 'attendant-attention':
+      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
+      case 'reports':
+        return <Suspense fallback={<div>Carregando...</div>}><Report /></Suspense>;
       default:
-        return <AccessBlocked/>; 
+        return <AccessBlocked />;
     }
   };
 
@@ -148,42 +157,42 @@ const DashboardPage = () => {
         }
       }
     };
-    checkOverflow(); 
-    window.addEventListener('resize', checkOverflow); 
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
     return () => {
-      window.removeEventListener('resize', checkOverflow); 
-      if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current); 
+      window.removeEventListener('resize', checkOverflow);
+      if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
     };
   }, []);
 
   useEffect(() => {
     const el = navRef.current;
-    if (!el) return; 
+    if (!el) return;
 
     const onScroll = () => {
       if (
         el.scrollTop < lastScrollTopRef.current &&
         el.scrollTop + el.clientHeight < el.scrollHeight - 2
       ) {
-        setScrollDownHintVisible(true); 
+        setScrollDownHintVisible(true);
         if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
         scrollHintTimeout.current = setTimeout(() => setScrollDownHintVisible(false), 2000);
       } else if (el.scrollTop > lastScrollTopRef.current) {
         setScrollDownHintVisible(false);
         if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
       }
-      lastScrollTopRef.current = el.scrollTop; 
+      lastScrollTopRef.current = el.scrollTop;
     };
 
     el.addEventListener('scroll', onScroll);
-    return () => el.removeEventListener('scroll', onScroll); 
+    return () => el.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
     if (permissions && Array.isArray(permissions) && permissions.length > 0) {
       const findInitialActiveItem = () => {
         if (userRole === 'Admin') {
-            return 'dashboard'; 
+          return 'dashboard';
         }
 
         if (permissions.includes('dashboard_visualizar')) {
@@ -212,14 +221,14 @@ const DashboardPage = () => {
         }
       }
     }
-  }, [permissions, userRole]); 
+  }, [permissions, userRole, activeItem]);
 
   useEffect(() => {
     if (showWelcomeMessage) {
       const timeout = setTimeout(() => {
         setShowWelcomeMessage(false);
-      }, 5000); 
-      return () => clearTimeout(timeout); 
+      }, 5000);
+      return () => clearTimeout(timeout);
     }
   }, [showWelcomeMessage]);
 
@@ -234,7 +243,7 @@ const DashboardPage = () => {
                   itemRefs.current[item.name] = React.createRef();
                 }
 
-                if (!isMenuItemVisible(item.name)) {
+                if (!isMenuItemVisible(item.name, item)) {
                   return null;
                 }
 
@@ -247,10 +256,9 @@ const DashboardPage = () => {
                     onMouseEnter={() => handleMouseEnter(item.name)}
                     onMouseLeave={handleMouseLeave}
                   >
-
                     <i className={`fas ${item.icon}`}></i>
                     {!isSidebarCollapsed && <span>{item.label}</span>}
-                
+
                     {isSidebarCollapsed && hoveredItem === item.name && (
                       <TooltipPortal targetRef={itemRefs.current[item.name]}>{item.label}</TooltipPortal>
                     )}
@@ -273,6 +281,7 @@ const DashboardPage = () => {
               </li>
             </ul>
 
+            {/* FIX: Corrected variable name from showScrollDownHintVisible to scrollDownHintVisible */}
             {scrollDownHintVisible && (
               <div className={styles.scrollDownHint}>
                 <i className="fas fa-chevron-down"></i>

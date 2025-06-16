@@ -270,16 +270,7 @@ const CalendarUpdate = () => {
                     />
                   </div>
                 </div>
-                <div style={{ marginBottom: 16 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Cor</label>
-                  <input
-                    type="color"
-                    name="color"
-                    value={eventData.color}
-                    onChange={handleChange}
-                    style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer' }}
-                  />
-                </div>
+                <br />
                 {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
                 <div style={{ display: 'flex', gap: 12 }}>
                   <button type="submit" className={styles.confirmButton} style={{ width: '100%' }}>

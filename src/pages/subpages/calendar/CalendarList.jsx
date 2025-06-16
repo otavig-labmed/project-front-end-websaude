@@ -1,9 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import styles from '../../../styles/pages-styles/CalendarStyle.module.css';
 
-// Lazy load do FullCalendar
 const FullCalendar = lazy(() => import('@fullcalendar/react'));
-// Importação normal dos plugins
+
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 
@@ -11,31 +10,27 @@ const DoctorCalendar = () => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [showDoctorModal, setShowDoctorModal] = useState(true);
 
-  // Dados dos médicos
   const doctors = [
     { id: '1', name: 'Dr. João Silva', specialty: 'Cardiologia', crm: 'CRM/SP 12345' },
     { id: '2', name: 'Dra. Ana Costa', specialty: 'Dermatologia', crm: 'CRM/SP 67890' },
     { id: '3', name: 'Dr. Pedro Oliveira', specialty: 'Pediatria', crm: 'CRM/SP 54321' }
   ];
 
-  // Carregar o médico selecionado do sessionStorage
   useEffect(() => {
     const savedDoctorId = sessionStorage.getItem('selectedDoctorId');
     if (savedDoctorId) {
       const doctor = doctors.find(d => d.id === savedDoctorId);
       setSelectedDoctor(doctor);
-      setShowDoctorModal(false); // Fechar modal após selecionar médico
+      setShowDoctorModal(false);
     }
   }, []);
 
-  // Dados dos eventos
   const events = [
     { id: '1', title: 'Disponível', start: '2025-11-15T10:00:00', end: '2023-11-15T10:30:00', color: '#10b981', doctorId: '1' },
     { id: '2', title: 'Consulta - Maria Santos', start: '2025-11-15T11:00:00', end: '2023-11-15T11:30:00', color: '#3b82f6', doctorId: '1' },
     { id: '3', title: 'Disponível', start: '2025-11-15T14:00:00', end: '2023-11-15T14:30:00', color: '#10b981', doctorId: '2' }
   ];
 
-  // Atualizar o médico selecionado e salvar no sessionStorage
   const handleDoctorSelect = (e) => {
     const doctorId = e.target.value;
     const doctor = doctors.find(d => d.id === doctorId);
@@ -43,7 +38,6 @@ const DoctorCalendar = () => {
     sessionStorage.setItem('selectedDoctorId', doctorId);
   };
 
-  // Evento de clique no calendário
   const handleEventClick = (info) => {
     alert(`Clicou no evento: ${info.event.title}`);
   };
@@ -80,15 +74,16 @@ const DoctorCalendar = () => {
       {selectedDoctor && (
         <div className={styles.scrollContainer}>
           <div className={styles.calendarHeader}>
-            <h1 className={styles.doctorTitle}>Agenda do {selectedDoctor.name}</h1>
-            <p className={styles.doctorInfo}>
+            <h1 className={styles.doctorTitle}>Agenda {selectedDoctor.name}</h1>
+            <br />
+            {/*<p className={styles.doctorInfo}>
               CRM: {selectedDoctor.crm} | Especialidade: {selectedDoctor.specialty}
-            </p>
+            </p> */}
             <button
               className={styles.changeDoctorButton}
               onClick={() => setShowDoctorModal(true)}
             >
-              Trocar Médico
+              Trocar de Médico
             </button>
           </div>
 

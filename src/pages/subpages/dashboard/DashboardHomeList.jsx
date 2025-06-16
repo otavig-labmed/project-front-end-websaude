@@ -31,69 +31,71 @@ const notices = [
 
 const DashboardHomeList = () => { 
   return (
-    <div className={styles.dashboardWidth}>
-      <div className={styles.dashboardHomeContainer}>
-        <h2 style={{ marginBottom: 24 }}>Bem-vindo(a) ao Dashboard!</h2>
-        
-        <div className={styles.dashboardGrid}>
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Médicos</div>
-            <div className={styles.cardValue}>{summary.doctors}</div>
-          </div>
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Pacientes</div>
-            <div className={styles.cardValue}>{summary.patients}</div>
-          </div>
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Compromissos</div>
-            <div className={styles.cardValue}>{summary.appointments}</div>
-          </div>
-          <div className={styles.card}>
-            <div className={styles.cardTitle}>Faturamento</div>
-            <div className={styles.cardValue}>R$ {summary.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-          </div>
-        </div>
-
-        <div className={styles.chartsSection}>
-          <div className={styles.chartCard}>
-            <div className={styles.chartTitle}>Compromissos por dia</div>
-            <div className={styles.barChart}>
-              {appointmentsByDay.map((item) => (
-                <div key={item.day} className={styles.barItem}>
-                  <div
-                    className={styles.bar}
-                    style={{ height: `${item.value * 12}px`, background: '#3b82f6' }}
-                    title={item.value}
-                  ></div>
-                  <span className={styles.barLabel}>{item.day}</span>
-                </div>
-              ))}
+    <div className={styles.scrollContainer}>
+       <div className={styles.dashboardWidth}>
+        <div className={styles.dashboardHomeContainer}>
+          {/* <h2 style={{ marginBottom: 24 }}>Bem-vindo(a) ao Dashboard!</h2> */}
+          
+          <div className={styles.dashboardGrid}>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Médicos</div>
+              <div className={styles.cardValue}>{summary.doctors}</div>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Pacientes</div>
+              <div className={styles.cardValue}>{summary.patients}</div>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Compromissos</div>
+              <div className={styles.cardValue}>{summary.appointments}</div>
+            </div>
+            <div className={styles.card}>
+              <div className={styles.cardTitle}>Faturamento</div>
+              <div className={styles.cardValue}>R$ {summary.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
             </div>
           </div>
-          <div className={styles.chartCard}>
-            <div className={styles.chartTitle}>Faturamento mensal</div>
-            <div className={styles.barChart}>
-              {revenueByMonth.map((item) => (
-                <div key={item.month} className={styles.barItem}>
-                  <div
-                    className={styles.bar}
-                    style={{ height: `${item.value / 100}px`, background: '#10b981' }}
-                    title={item.value}
-                  ></div>
-                  <span className={styles.barLabel}>{item.month}</span>
-                </div>
-              ))}
+
+          <div className={styles.chartsSection}>
+            <div className={styles.chartCard}>
+              <div className={styles.chartTitle}>Compromissos por dia</div>
+              <div className={styles.barChart}>
+                {appointmentsByDay.map((item) => (
+                  <div key={item.day} className={styles.barItem}>
+                    <div
+                      className={styles.bar}
+                      style={{ height: `${item.value * 12}px`, background: '#3b82f6' }}
+                      title={item.value}
+                    ></div>
+                    <span className={styles.barLabel}>{item.day}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className={styles.chartCard}>
+              <div className={styles.chartTitle}>Faturamento mensal</div>
+              <div className={styles.barChart}>
+                {revenueByMonth.map((item) => (
+                  <div key={item.month} className={styles.barItem}>
+                    <div
+                      className={styles.bar}
+                      style={{ height: `${item.value / 100}px`, background: '#10b981' }}
+                      title={item.value}
+                    ></div>
+                    <span className={styles.barLabel}>{item.month}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className={styles.noticesSection}>
-          <div className={styles.noticesTitle}>Avisos</div>
-          <ul className={styles.noticesList}>
-            {notices.map((notice) => (
-              <li key={notice.id} className={styles.noticeItem}>{notice.text}</li>
-            ))}
-          </ul>
+          <div className={styles.noticesSection}>
+            <div className={styles.noticesTitle}>Avisos</div>
+            <ul className={styles.noticesList}>
+              {notices.map((notice) => (
+                <li key={notice.id} className={styles.noticeItem}>{notice.text}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

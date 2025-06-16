@@ -9,7 +9,7 @@ const menuComponents = [
 
 const DashboardHome = () => (
   <div>
-      <BodgettMenu components={[menuComponents]}/>
+      <BodgettMenu components={menuComponents}/>
   </div>
 );
 

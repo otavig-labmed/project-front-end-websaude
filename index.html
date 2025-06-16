@@ -2,30 +2,156 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/logo-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>WebSaude</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-
   </head>
   <body>
     <div id="root"></div>
+
+    <div id="dragPrompt" class="drag-prompt">
+      Mova-me se precisar
+    </div>
+
     <script type="module" src="/src/main.jsx"></script>
-    <!-- Script do UserWay -->
+
     <script src="https://cdn.userway.org/widget.js"></script>
-    <!-- <script>userWay.init();</script> -->
+
     <style>
       #userwayAccessibilityIcon {
-        position:fixed; 
-        right: 0vw;     
-        top: 40vh;
-        height: 40px;   
-        width: 40px;    
+        position: fixed;
+        right: 20px;
+        top: 60%;
+        height: 40px;
+        width: 40px;
+        cursor: grab;
+        z-index: 9999;
+      }
+
+      .drag-prompt {
+        position: fixed;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 5px;
+        font-size: 0.9em;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+        z-index: 10000;
+        white-space: nowrap;
+        pointer-events: none;
+        transform: translateX(-50%);
+      }
+
+      .drag-prompt.show {
+        opacity: 1;
+        visibility: visible;
       }
     </style>
+
+    <script>
+      function initializeDrag() {
+        const userwayIcon = document.getElementById('userwayAccessibilityIcon');
+        const dragPrompt = document.getElementById('dragPrompt');
+
+        if (!userwayIcon) {
+          console.log("UserWay icon not found yet, retrying...");
+          setTimeout(initializeDrag, 500);
+          return;
+        }
+
+        console.log("UserWay icon found! Applying drag functionality.");
+
+        let isDragging = false;
+        let initialMouseX, initialMouseY; 
+        let initialIconRight, initialIconTop; 
+
+        function updatePromptPosition() {
+            if (!userwayIcon || !dragPrompt) return;
+
+            const iconRect = userwayIcon.getBoundingClientRect();
+            dragPrompt.style.left = (iconRect.left + iconRect.width / 2) + 'px';
+            dragPrompt.style.top = (iconRect.bottom + 10) + 'px'; 
+        }
+
+        if (dragPrompt) {
+          updatePromptPosition();
+          setTimeout(() => {
+            dragPrompt.classList.add('show');
+            setTimeout(() => {
+              dragPrompt.classList.remove('show');
+            }, 3000); 
+          }, 500); 
+        }
+
+
+        function dragStart(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          isDragging = true;
+          userwayIcon.style.cursor = 'grabbing';
+
+          initialIconRight = window.innerWidth - userwayIcon.getBoundingClientRect().right;
+          initialIconTop = userwayIcon.getBoundingClientRect().top;
+
+          if (e.type === "touchstart") {
+            initialMouseX = e.touches[0].clientX;
+            initialMouseY = e.touches[0].clientY;
+          } else {
+            initialMouseX = e.clientX;
+            initialMouseY = e.clientY;
+          }
+        }
+
+        function drag(e) {
+          if (!isDragging) return;
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          let currentClientX;
+          let currentClientY;
+
+          if (e.type === "touchmove") {
+            currentClientX = e.touches[0].clientX;
+            currentClientY = e.touches[0].clientY;
+          } else {
+            currentClientX = e.clientX;
+            currentClientY = e.clientY;
+          }
+
+          const deltaX = currentClientX - initialMouseX;
+          const deltaY = currentClientY - initialMouseY;
+
+          userwayIcon.style.right = (initialIconRight - deltaX) + 'px';
+          userwayIcon.style.top = (initialIconTop + deltaY) + 'px';
+
+          updatePromptPosition();
+        }
+
+        function dragEnd() {
+          isDragging = false;
+          userwayIcon.style.cursor = 'grab';
+        }
+
+        userwayIcon.addEventListener("mousedown", dragStart);
+        document.addEventListener("mouseup", dragEnd);
+        document.addEventListener("mousemove", drag);
+
+        userwayIcon.addEventListener("touchstart", dragStart);
+        document.addEventListener("touchend", dragEnd);
+        document.addEventListener("touchmove", drag);
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initializeDrag, 1000);
+      });
+    </script>
   </body>
-  
 </html>

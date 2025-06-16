@@ -11,19 +11,19 @@ const Calendar = () => {
 
   const calendarSubMenuItems = [
     {
-      label: "Listar compromissos",
+      label: "Listar Compromissos",
       name: "calendar-list", 
       component: <Suspense fallback={<div>Carregando...</div>}><CalendarList /></Suspense>,
       permission: "agenda_visualizar"
     },
     {
-      label: "Criar compromisso",
+      label: "Criar Compromisso",
       name: "calendar-create",
       component: <Suspense fallback={<div>Carregando...</div>}><CalendarCreate /></Suspense>,
       permission: "agenda_criar" 
     },
     {
-      label: "Atualizar compromisso",
+      label: "Atualizar Compromisso",
       name: "calendar-update",
       component: <Suspense fallback={<div>Carregando...</div>}><CalendarUpdate /></Suspense>,
       permission: "agenda_editar" 
