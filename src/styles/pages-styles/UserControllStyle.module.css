@@ -95,6 +95,9 @@
 }
 
 .header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   position: sticky;
   top: 0;
   background-color: white;
@@ -493,4 +496,28 @@
 
 .deleteButton:hover {
     background-color: #dc2626;
+}
+
+.scrollContainer {
+    max-height: calc(108vh - 200px);
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }

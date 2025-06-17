@@ -11,7 +11,6 @@ const AgreementsList = () => {
         { id: 4, nome: "SulAmérica", registroANS: "456789", ativo: true },
         { id: 5, nome: "NotreDame Intermédica", registroANS: "321654", ativo: true },
         { id: 6, nome: "NotreDame Intermédica", registroANS: "321654", ativo: true },
-        { id: 5, nome: "NotreDame Teste", registroANS: "321654", ativo: true },
     ]);
 
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
