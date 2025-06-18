@@ -1,0 +1,49 @@
+.section {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.sectionSummary {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  list-style: none;
+  position: relative;
+}
+
+.sectionSummary::before {
+  content: '▼';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.2s ease;
+}
+
+.section[open] .sectionSummary::before {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.sectionDescription {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+.sectionContent {
+  margin-top: 1rem;
+} 

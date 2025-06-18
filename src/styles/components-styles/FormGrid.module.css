@@ -1,0 +1,12 @@
+.formGrid {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (max-width: 768px) {
+  .formGrid {
+    grid-template-columns: 1fr !important;
+  }
+} 

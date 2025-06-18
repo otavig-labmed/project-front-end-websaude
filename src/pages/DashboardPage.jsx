@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect, lazy, Suspense } from "react";
+import React, { useState, useRef, useEffect, lazy, Suspense, useMemo, useCallback, memo } from "react";
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/pages-styles/DashboardStyle.module.css';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import TooltipPortal from '../components/TooltipPortal';
+import { useSidebarOptimization } from '../hooks/useSidebarOptimization';
 
 const DashboardHome = lazy(() => import('./subpages/dashboard/DashboardHome'));
 const Report = lazy(() => import('./subpages/report/Report'));
@@ -13,11 +14,52 @@ const Calendar = lazy(() => import('./subpages/calendar/Calendar.jsx'));
 const Agreements = lazy(() => import('./subpages/agreements/Agreements.jsx'));
 const AccessBlocked = lazy(() => import('./subpages/AccessBlocked.jsx'));
 const Findings = lazy(() => import('./subpages/findings/Findings.jsx'));
+const Patient = lazy(()=> import('./subpages/patient/Patient.jsx'));
+
 const Alert = lazy(() => import('../components/alerts/Alert'));
 
-const DashboardPage = () => {
+// Componente de fallback otimizado
+const LoadingFallback = memo(() => <div>Carregando...</div>);
+LoadingFallback.displayName = 'LoadingFallback';
+
+// Componente de item do menu otimizado
+const MenuItem = memo(({ 
+  item, 
+  isActive, 
+  isVisible, 
+  isSidebarCollapsed, 
+  hoveredItem, 
+  onItemClick, 
+  onMouseEnter, 
+  onMouseLeave, 
+  itemRef 
+}) => {
+  if (!isVisible) return null;
+
+  return (
+    <li
+      ref={itemRef}
+      className={isActive ? styles.active : ''}
+      onClick={() => onItemClick(item.name)}
+      onMouseEnter={() => onMouseEnter(item.name)}
+      onMouseLeave={onMouseLeave}
+    >
+      <i className={`fas ${item.icon}`}></i>
+      {!isSidebarCollapsed && <span>{item.label}</span>}
+
+      {isSidebarCollapsed && hoveredItem === item.name && (
+        <TooltipPortal targetRef={itemRef}>{item.label}</TooltipPortal>
+      )}
+    </li>
+  );
+});
+MenuItem.displayName = 'MenuItem';
+
+// Componente principal otimizado
+const DashboardPage = memo(() => {
   const { permissions, logout, userRole } = useAuth();
   const navigate = useNavigate();
+  const { debouncedResize, throttledScroll, debouncedStateUpdate, cleanup } = useSidebarOptimization();
 
   const [showWelcomeMessage, setShowWelcomeMessage] = useState(true);
   const [activeItem, setActiveItem] = useState('dashboard');
@@ -28,17 +70,17 @@ const DashboardPage = () => {
 
   const navRef = useRef();
   const scrollHintTimeout = useRef();
-
   const itemRefs = useRef({});
   const lastScrollTopRef = useRef(0);
 
-  const menuItems = [
+  // Memoized menu items
+  const menuItems = useMemo(() => [
     { name: 'dashboard', icon: 'fa-tachometer-alt', label: 'Dashboard', permission: 'dashboard_visualizar' },
     { name: 'calendar', icon: 'fa-calendar-alt', label: 'Calendário', permission: 'agenda_visualizar' },
     { name: 'engagements', icon: 'fa-clipboard-list', label: 'Compromissos', permission: 'engagements_visualizar' },
     { name: 'reports', icon: 'fa-chart-bar', label: 'Relatórios', permission: 'reportes_visualizar' },
     { name: 'medical-attention', icon: 'fa-user-doctor', label: 'Atendimento Médico', permission: 'prontuario_visualizar' },
-    { name: 'patients', icon: 'fa-user-plus', label: 'Pacientes', permission: 'paciente_visualizar' },
+    { name: 'patient', icon: 'fa-user-plus', label: 'Pacientes', permission: 'paciente_visualizar' },
     { name: 'financial', icon: 'fa-money-bill-wave', label: 'Caixa', permission: 'financeiro_visualizar' },
     { name: 'manage-permissions', icon: 'fa-users-cog', label: 'Gerenciar Usuários', isMaster: true },
     { name: 'agreements', icon: 'fa-handshake', label: 'Cadastro de Convênios', isMaster: true },
@@ -48,9 +90,10 @@ const DashboardPage = () => {
     { name: 'attendant-attention', icon: 'fa-headset', label: 'Atendimento Atendente', permission: 'atendimento_atendente_visualizar' },
     { name: 'findings', icon: 'fa-bug', label: 'Relatar_Bugs', permission: 'findings_visualizar' },
     { name: 'settings', icon: 'fa-cog', label: 'Configurações' },
-  ];
+  ], []);
 
-  const isMenuItemVisible = (itemName, itemDefinition = null) => {
+  // Memoized visibility checker
+  const isMenuItemVisible = useCallback((itemName, itemDefinition = null) => {
     if (['dashboard', 'logout', 'settings'].includes(itemName)) {
       return true;
     }
@@ -70,35 +113,54 @@ const DashboardPage = () => {
     }
 
     return false;
-  };
+  }, [menuItems, permissions, userRole]);
 
-  const handleItemClick = (itemName) => {
+  const visibleMenuItems = useMemo(() => 
+    menuItems.filter(item => isMenuItemVisible(item.name, item)),
+    [menuItems, isMenuItemVisible]
+  );
+
+  const handleItemClick = useCallback((itemName) => {
     const itemDefinition = menuItems.find(item => item.name === itemName);
     if (isMenuItemVisible(itemName, itemDefinition)) {
       setActiveItem(itemName);
     } else {
       setActiveItem('access-blocked');
     }
-  };
+  }, [menuItems, isMenuItemVisible]);
 
-  const handleSidebarToggle = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+  const handleSidebarToggle = useCallback(() => {
+    setIsSidebarCollapsed(prev => !prev);
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     window.location.reload();
-  };
+  }, [logout]);
 
-  const handleMouseEnter = (itemName) => {
+  const handleMouseEnter = useCallback((itemName) => {
     if (isSidebarCollapsed) {
       setHoveredItem(itemName);
     }
-  };
+  }, [isSidebarCollapsed]);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setHoveredItem(null);
-  };
+  }, []);
 
-  const renderContent = () => {
+  // Mapeamento de componentes otimizado
+  const componentMap = useMemo(() => ({
+    dashboard: DashboardHome,
+    settings: Settings,
+    'manage-permissions': UserControll,
+    calendar: Calendar,
+    agreements: Agreements,
+    findings: Findings,
+    patient: Patient,
+    reports: Report,
+  }), []);
+
+  const renderContent = useCallback(() => {
     if (activeItem === 'access-blocked') {
       return <AccessBlocked />;
     }
@@ -109,40 +171,20 @@ const DashboardPage = () => {
       return <AccessBlocked />;
     }
 
-    switch (activeItem) {
-      case 'dashboard':
-        return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'settings':
-        return <Suspense fallback={<div>Carregando...</div>}><Settings /></Suspense>;
-      case 'manage-permissions':
-        return <Suspense fallback={<div>Carregando...</div>}><UserControll /></Suspense>;
-      case 'calendar':
-        return <Suspense fallback={<div>Carregando...</div>}><Calendar /></Suspense>;
-      case 'agreements':
-        return <Suspense fallback={<div>Carregando...</div>}><Agreements /></Suspense>;
-      case 'findings':
-        return <Suspense fallback={<div>Carregando...</div>}><Findings/></Suspense>
-      // case 'medical-attention':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'patients':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'financial':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'procedures':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'telemedicine':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'offices':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      // case 'attendant-attention':
-      //   return <Suspense fallback={<div>Carregando...</div>}><DashboardHome /></Suspense>;
-      case 'reports':
-        return <Suspense fallback={<div>Carregando...</div>}><Report /></Suspense>;
-      default:
-        return <AccessBlocked />;
+    const Component = componentMap[activeItem];
+    
+    if (Component) {
+      return (
+        <Suspense fallback={<LoadingFallback />}>
+          <Component />
+        </Suspense>
+      );
     }
-  };
 
+    return <AccessBlocked />;
+  }, [activeItem, menuItems, isMenuItemVisible, componentMap]);
+
+  // Otimização dos event listeners
   useEffect(() => {
     const checkOverflow = () => {
       if (navRef.current) {
@@ -151,42 +193,41 @@ const DashboardPage = () => {
         setShowScrollDown(hasOverflow);
 
         if (hasOverflow && el.scrollTop === 0) {
-          setScrollDownHintVisible(true);
-          if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
-          scrollHintTimeout.current = setTimeout(() => setScrollDownHintVisible(false), 2000);
+          debouncedStateUpdate(setScrollDownHintVisible, true, 2000);
         }
       }
     };
+    
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
+    window.addEventListener('resize', () => debouncedResize(checkOverflow, 100));
+    
     return () => {
-      window.removeEventListener('resize', checkOverflow);
-      if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
+      window.removeEventListener('resize', () => debouncedResize(checkOverflow, 100));
+      cleanup();
     };
-  }, []);
+  }, [debouncedResize, debouncedStateUpdate, cleanup]);
 
   useEffect(() => {
     const el = navRef.current;
     if (!el) return;
 
     const onScroll = () => {
-      if (
-        el.scrollTop < lastScrollTopRef.current &&
-        el.scrollTop + el.clientHeight < el.scrollHeight - 2
-      ) {
-        setScrollDownHintVisible(true);
-        if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
-        scrollHintTimeout.current = setTimeout(() => setScrollDownHintVisible(false), 2000);
-      } else if (el.scrollTop > lastScrollTopRef.current) {
-        setScrollDownHintVisible(false);
-        if (scrollHintTimeout.current) clearTimeout(scrollHintTimeout.current);
-      }
-      lastScrollTopRef.current = el.scrollTop;
+      throttledScroll(() => {
+        if (
+          el.scrollTop < lastScrollTopRef.current &&
+          el.scrollTop + el.clientHeight < el.scrollHeight - 2
+        ) {
+          debouncedStateUpdate(setScrollDownHintVisible, true, 2000);
+        } else if (el.scrollTop > lastScrollTopRef.current) {
+          setScrollDownHintVisible(false);
+        }
+        lastScrollTopRef.current = el.scrollTop;
+      });
     };
 
-    el.addEventListener('scroll', onScroll);
+    el.addEventListener('scroll', onScroll, { passive: true });
     return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [throttledScroll, debouncedStateUpdate]);
 
   useEffect(() => {
     if (permissions && Array.isArray(permissions) && permissions.length > 0) {
@@ -221,7 +262,7 @@ const DashboardPage = () => {
         }
       }
     }
-  }, [permissions, userRole, activeItem]);
+  }, [permissions, userRole, activeItem, menuItems]);
 
   useEffect(() => {
     if (showWelcomeMessage) {
@@ -232,77 +273,74 @@ const DashboardPage = () => {
     }
   }, [showWelcomeMessage]);
 
+  // Memoized sidebar content
+  const sidebarContent = useMemo(() => (
+    <aside className={styles.sidebar}>
+      <nav ref={navRef}>
+        <ul>
+          {visibleMenuItems.map((item) => {
+            if (!itemRefs.current[item.name]) {
+              itemRefs.current[item.name] = React.createRef();
+            }
+
+            return (
+              <MenuItem
+                key={item.name}
+                item={item}
+                isActive={activeItem === item.name}
+                isVisible={isMenuItemVisible(item.name, item)}
+                isSidebarCollapsed={isSidebarCollapsed}
+                hoveredItem={hoveredItem}
+                onItemClick={handleItemClick}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                itemRef={itemRefs.current[item.name]}
+              />
+            );
+          })}
+
+          <li
+            className={`${activeItem === 'logout' ? styles.active : ''} ${styles.logoutItem}`}
+            onClick={handleLogout}
+            onMouseEnter={() => handleMouseEnter('logout')}
+            onMouseLeave={handleMouseLeave}
+            ref={itemRefs.current['logout'] || (itemRefs.current['logout'] = React.createRef())}
+          >
+            <i className="fas fa-sign-out-alt"></i>
+            {!isSidebarCollapsed && <span>Logout</span>}
+            {isSidebarCollapsed && hoveredItem === 'logout' && (
+              <TooltipPortal targetRef={itemRefs.current['logout']}>Logout</TooltipPortal>
+            )}
+          </li>
+        </ul>
+
+        {scrollDownHintVisible && (
+          <div className={styles.scrollDownHint}>
+            <i className="fas fa-chevron-down"></i>
+          </div>
+        )}
+      </nav>
+
+      <div
+        className={`${styles.sidebarToggle} ${isSidebarCollapsed ? styles.collapsed : ''}`}
+        onClick={handleSidebarToggle}
+        onMouseEnter={() => handleMouseEnter('toggle')}
+        onMouseLeave={handleMouseLeave}
+        ref={itemRefs.current['toggle'] || (itemRefs.current['toggle'] = React.createRef())}
+      >
+        <i className={`fas ${isSidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`}></i>
+        {!isSidebarCollapsed && <span style={{ marginLeft: 10 }}>Colapsar</span>}
+        {isSidebarCollapsed && hoveredItem === 'toggle' && (
+          <TooltipPortal targetRef={itemRefs.current['toggle']}>Expandir</TooltipPortal>
+        )}
+      </div>
+    </aside>
+  ), [visibleMenuItems, activeItem, isSidebarCollapsed, hoveredItem, handleItemClick, handleMouseEnter, handleMouseLeave, handleLogout, handleSidebarToggle, scrollDownHintVisible, isMenuItemVisible]);
+
   return (
     <div className={styles.dashboardBody}>
       <div className={`${styles.dashboardWrapper} ${isSidebarCollapsed ? styles.collapsed : ''}`}>
-        <aside className={styles.sidebar}>
-          <nav ref={navRef}>
-            <ul>
-              {menuItems.map((item) => {
-                if (!itemRefs.current[item.name]) {
-                  itemRefs.current[item.name] = React.createRef();
-                }
-
-                if (!isMenuItemVisible(item.name, item)) {
-                  return null;
-                }
-
-                return (
-                  <li
-                    key={item.name}
-                    ref={itemRefs.current[item.name]}
-                    className={activeItem === item.name ? styles.active : ''}
-                    onClick={() => handleItemClick(item.name)}
-                    onMouseEnter={() => handleMouseEnter(item.name)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <i className={`fas ${item.icon}`}></i>
-                    {!isSidebarCollapsed && <span>{item.label}</span>}
-
-                    {isSidebarCollapsed && hoveredItem === item.name && (
-                      <TooltipPortal targetRef={itemRefs.current[item.name]}>{item.label}</TooltipPortal>
-                    )}
-                  </li>
-                );
-              })}
-
-              <li
-                className={`${activeItem === 'logout' ? styles.active : ''} ${styles.logoutItem}`}
-                onClick={handleLogout}
-                onMouseEnter={() => handleMouseEnter('logout')}
-                onMouseLeave={handleMouseLeave}
-                ref={itemRefs.current['logout'] || (itemRefs.current['logout'] = React.createRef())}
-              >
-                <i className="fas fa-sign-out-alt"></i>
-                {!isSidebarCollapsed && <span>Logout</span>}
-                {isSidebarCollapsed && hoveredItem === 'logout' && (
-                  <TooltipPortal targetRef={itemRefs.current['logout']}>Logout</TooltipPortal>
-                )}
-              </li>
-            </ul>
-
-            {/* FIX: Corrected variable name from showScrollDownHintVisible to scrollDownHintVisible */}
-            {scrollDownHintVisible && (
-              <div className={styles.scrollDownHint}>
-                <i className="fas fa-chevron-down"></i>
-              </div>
-            )}
-          </nav>
-
-          <div
-            className={`${styles.sidebarToggle} ${isSidebarCollapsed ? styles.collapsed : ''}`}
-            onClick={handleSidebarToggle}
-            onMouseEnter={() => handleMouseEnter('toggle')}
-            onMouseLeave={handleMouseLeave}
-            ref={itemRefs.current['toggle'] || (itemRefs.current['toggle'] = React.createRef())}
-          >
-            <i className={`fas ${isSidebarCollapsed ? 'fa-chevron-right' : 'fa-chevron-left'}`}></i>
-            {!isSidebarCollapsed && <span style={{ marginLeft: 10 }}>Colapsar</span>}
-            {isSidebarCollapsed && hoveredItem === 'toggle' && (
-              <TooltipPortal targetRef={itemRefs.current['toggle']}>Expandir</TooltipPortal>
-            )}
-          </div>
-        </aside>
+        {sidebarContent}
 
         {showWelcomeMessage && (
           <Suspense fallback={<div>Carregando...</div>}>
@@ -318,6 +356,8 @@ const DashboardPage = () => {
       </div>
     </div>
   );
-};
+});
+
+DashboardPage.displayName = 'DashboardPage';
 
 export default DashboardPage;

@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, memo } from "react";
 import ReactDOM from "react-dom";
 import styles from "../styles/pages-styles/DashboardStyle.module.css";
 
-const TooltipPortal = ({ children, targetRef }) => {
+const TooltipPortal = memo(({ children, targetRef }) => {
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const tooltipRef = useRef();
 
-  useEffect(() => {
+  const updateCoords = useCallback(() => {
     if (targetRef && targetRef.current) {
       const rect = targetRef.current.getBoundingClientRect();
       setCoords({
@@ -14,7 +14,11 @@ const TooltipPortal = ({ children, targetRef }) => {
         left: rect.right + 10
       });
     }
-  }, [targetRef, children]);
+  }, [targetRef]);
+
+  useEffect(() => {
+    updateCoords();
+  }, [updateCoords, children]);
 
   if (typeof window === "undefined") return null;
 
@@ -35,6 +39,8 @@ const TooltipPortal = ({ children, targetRef }) => {
     </div>,
     document.body
   );
-};
+});
+
+TooltipPortal.displayName = 'TooltipPortal';
 
 export default TooltipPortal; 

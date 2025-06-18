@@ -1,0 +1,81 @@
+.checkboxGroup {
+  margin-bottom: 1.5rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1.25rem;
+  border: 1px solid #e2e8f0;
+}
+
+.checkboxGroupTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.checkboxGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.checkboxItem:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  transition: color 0.2s ease;
+  width: 100%;
+}
+
+.checkboxLabel:hover {
+  color: #1e293b;
+}
+
+.checkboxInput {
+  margin-right: 0.75rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.checkboxText {
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .checkboxGrid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem;
+  }
+  
+  .checkboxItem {
+    padding: 0.625rem;
+  }
+  
+  .checkboxLabel {
+    font-size: 0.875rem;
+  }
+} 

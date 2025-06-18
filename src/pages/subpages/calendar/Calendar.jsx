@@ -6,7 +6,7 @@ const CalendarCreate = lazy(() => import("./CalendarCreate"));
 const CalendarList = lazy(() => import("./CalendarList"));
 const CalendarUpdate = lazy(() => import("./CalendarUpdate"));
 
-const Calendar = () => {
+function Calendar() {
   const { permissions } = useAuth();
 
   const calendarSubMenuItems = [
@@ -50,6 +50,6 @@ const Calendar = () => {
       <BodgettMenu components={filteredMenuComponents} />
     </div>
   );
-};
+}
 
 export default Calendar;

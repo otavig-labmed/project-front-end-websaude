@@ -2,7 +2,8 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "../styles/pages-styles/NotFoundStyle.module.css";
 
-const NotFoundPage = () => {
+// Componente como função nomeada para compatibilidade com Fast Refresh
+function NotFoundPage() {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
@@ -10,18 +11,17 @@ const NotFoundPage = () => {
   };
 
   return (
-    <div className={styles['not-found-container']}>
-      <h1 style={{ fontSize: '6rem', color: '#1e88e5' }}>404</h1>
-      <h1>Página não encontrada</h1>
-      <p>
-        Desculpe, a página que você tentou acessar não pôde ser encontrada.
-        Verifique se o endereço está correto ou volte para a página anterior.
-      </p>
-      <button onClick={handleGoBack} className={styles['back-button']}>
-        Retornar...
-      </button>
+    <div className={styles.container}>
+      <div className={styles.content}>
+        <h1>404</h1>
+        <h2>Página não encontrada</h2>
+        <p>A página que você está procurando não existe.</p>
+        <button onClick={handleGoBack} className={styles.backButton}>
+          Voltar
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 export default NotFoundPage;

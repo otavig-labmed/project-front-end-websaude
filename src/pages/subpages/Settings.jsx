@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-
+import { 
+  Form, 
+  FormSection, 
+  FormField, 
+  FormGrid, 
+  CheckboxGroup, 
+  Modal 
+} from "../../components";
 import styles from "../../styles/pages-styles/SettingsStyle.module.css";
 
 const Settings = () => {
@@ -43,12 +50,8 @@ const Settings = () => {
     setPasswordError(""); 
   };
 
-  const handleNotificationChange = (e) => {
-    const { name, checked } = e.target;
-    setNotifications((prevNotifications) => ({
-      ...prevNotifications,
-      [name]: checked,
-    }));
+  const handleNotificationChange = (newNotifications) => {
+    setNotifications(newNotifications);
   };
 
   const handlePersonalInfoSubmit = (e) => {
@@ -108,6 +111,19 @@ const Settings = () => {
     closePasswordModal();
   };
 
+  const notificationOptions = [
+    { key: 'emailNotifications', label: 'Notificações por E-mail' },
+    { key: 'smsNotifications', label: 'Notificações por SMS' },
+    { key: 'appNotifications', label: 'Notificações no Aplicativo' },
+    { key: 'newsletter', label: 'Receber Newsletter' }
+  ];
+
+  const languageOptions = [
+    { value: 'pt-BR', label: 'Português (Brasil)' },
+    { value: 'en-US', label: 'English (US)' },
+    { value: 'es-ES', label: 'Español (España)' }
+  ];
+
   return (
     <div className={styles.scrollContainer}>
       <div className={styles.pageContainer}>
@@ -115,55 +131,45 @@ const Settings = () => {
           <div className={styles.card}>
             <h1 className={styles.mainCardTitle}>Configurações da Conta</h1>
 
-            <div className={styles.section}> 
-              <h2 className={styles.cardTitle}>Informações Pessoais</h2>
+            <FormSection title="Informações Pessoais">
               <form onSubmit={handlePersonalInfoSubmit} className={styles.form}>
-                <div className={styles.formGrid}>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="name">Nome Completo</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={personalInfo.name}
-                      onChange={handlePersonalInfoChange}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="email">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={personalInfo.email}
-                      onChange={handlePersonalInfoChange}
-                      disabled 
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="phone">Telefone</label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      value={personalInfo.phone}
-                      onChange={handlePersonalInfoChange}
-                    />
-                  </div>
-                  <div className={styles.formGroup}>
-                    <label htmlFor="language">Idioma Preferencial</label>
-                    <select
-                      id="language"
-                      name="language"
-                      value={personalInfo.language}
-                      onChange={handlePersonalInfoChange}
-                    >
-                      <option value="pt-BR">Português (Brasil)</option>
-                      <option value="en-US">English (US)</option>
-                      <option value="es-ES">Español (España)</option>
-                    </select>
-                  </div>
-                </div>
+                <FormGrid columns={2}>
+                  <FormField
+                    label="Nome Completo"
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={personalInfo.name}
+                    onChange={handlePersonalInfoChange}
+                    required
+                  />
+                  <FormField
+                    label="Email"
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={personalInfo.email}
+                    onChange={handlePersonalInfoChange}
+                    disabled
+                  />
+                  <FormField
+                    label="Telefone"
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={personalInfo.phone}
+                    onChange={handlePersonalInfoChange}
+                  />
+                  <FormField
+                    label="Idioma Preferencial"
+                    type="select"
+                    id="language"
+                    name="language"
+                    value={personalInfo.language}
+                    onChange={handlePersonalInfoChange}
+                    options={languageOptions}
+                  />
+                </FormGrid>
                 <div className={styles.formActions}>
                   <button type="button" className={styles.cancelButton}>
                     Cancelar
@@ -173,11 +179,12 @@ const Settings = () => {
                   </button>
                 </div>
               </form>
-            </div>
+            </FormSection>
 
-            <div className={styles.section}>
-              <h2 className={styles.cardTitle}>Segurança da Conta</h2>
-              <p>Gerencie suas credenciais de acesso e segurança da conta.</p>
+            <FormSection 
+              title="Segurança da Conta"
+              description="Gerencie suas credenciais de acesso e segurança da conta."
+            >
               <div className={styles.formActions}>
                 <button
                   type="button"
@@ -187,59 +194,16 @@ const Settings = () => {
                   Alterar Senha
                 </button>
               </div>
-            </div>
+            </FormSection>
 
-            <div className={styles.section}>
-              <h2 className={styles.cardTitle}>Preferências de Notificação</h2>
+            <FormSection title="Preferências de Notificação">
               <form onSubmit={handleNotificationSubmit} className={styles.form}>
-                <div className={styles.permissionsSection}>
-                  <div className={styles.permissionsGrid}>
-                    <div className={styles.permissionItem}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="emailNotifications"
-                          checked={notifications.emailNotifications}
-                          onChange={handleNotificationChange}
-                        />
-                        Notificações por E-mail
-                      </label>
-                    </div>
-                    <div className={styles.permissionItem}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="smsNotifications"
-                          checked={notifications.smsNotifications}
-                          onChange={handleNotificationChange}
-                        />
-                        Notificações por SMS
-                      </label>
-                    </div>
-                    <div className={styles.permissionItem}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="appNotifications"
-                          checked={notifications.appNotifications}
-                          onChange={handleNotificationChange}
-                        />
-                        Notificações no Aplicativo
-                      </label>
-                    </div>
-                    <div className={styles.permissionItem}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="newsletter"
-                          checked={notifications.newsletter}
-                          onChange={handleNotificationChange}
-                        />
-                        Receber Newsletter
-                      </label>
-                    </div>
-                  </div>
-                </div>
+                <CheckboxGroup
+                  options={notificationOptions}
+                  values={notifications}
+                  onChange={handleNotificationChange}
+                  columns={2}
+                />
                 <div className={styles.formActions}>
                   <button type="button" className={styles.cancelButton}>
                     Cancelar
@@ -249,64 +213,61 @@ const Settings = () => {
                   </button>
                 </div>
               </form>
-            </div>
+            </FormSection>
           </div>
         </div>
 
-        {showPasswordModal && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-              <h3 className={styles.modalTitle}>Alterar Senha</h3>
-              <form onSubmit={handlePasswordModalSubmit} className={styles.form}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="currentPasswordModal">Senha Atual</label>
-                  <input
-                    type="password"
-                    id="currentPasswordModal"
-                    name="currentPassword"
-                    value={passwordInfo.currentPassword}
-                    onChange={handlePasswordInfoChange}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="newPasswordModal">Nova Senha</label>
-                  <input
-                    type="password"
-                    id="newPasswordModal"
-                    name="newPassword"
-                    value={passwordInfo.newPassword}
-                    onChange={handlePasswordInfoChange}
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="confirmNewPasswordModal">Confirmar Nova Senha</label>
-                  <input
-                    type="password"
-                    id="confirmNewPasswordModal"
-                    name="confirmNewPassword"
-                    value={passwordInfo.confirmNewPassword}
-                    onChange={handlePasswordInfoChange}
-                  />
-                </div>
-                {passwordError && (
-                  <p className={styles.errorMessage}>{passwordError}</p>
-                )}
-                <div className={styles.modalActions}>
-                  <button
-                    type="button"
-                    className={styles.cancelButton}
-                    onClick={closePasswordModal}
-                  >
-                    Cancelar
-                  </button>
-                  <button type="submit" className={styles.submitButton}>
-                    Salvar Nova Senha
-                  </button>
-                </div>
-              </form>
+        <Modal
+          isOpen={showPasswordModal}
+          onClose={closePasswordModal}
+          title="Alterar Senha"
+          size="small"
+        >
+          <form onSubmit={handlePasswordModalSubmit} className={styles.form}>
+            <FormField
+              label="Senha Atual"
+              type="password"
+              id="currentPasswordModal"
+              name="currentPassword"
+              value={passwordInfo.currentPassword}
+              onChange={handlePasswordInfoChange}
+              required
+            />
+            <FormField
+              label="Nova Senha"
+              type="password"
+              id="newPasswordModal"
+              name="newPassword"
+              value={passwordInfo.newPassword}
+              onChange={handlePasswordInfoChange}
+              required
+            />
+            <FormField
+              label="Confirmar Nova Senha"
+              type="password"
+              id="confirmNewPasswordModal"
+              name="confirmNewPassword"
+              value={passwordInfo.confirmNewPassword}
+              onChange={handlePasswordInfoChange}
+              required
+            />
+            {passwordError && (
+              <p className={styles.errorMessage}>{passwordError}</p>
+            )}
+            <div className={styles.modalActions}>
+              <button
+                type="button"
+                className={styles.cancelButton}
+                onClick={closePasswordModal}
+              >
+                Cancelar
+              </button>
+              <button type="submit" className={styles.submitButton}>
+                Salvar Nova Senha
+              </button>
             </div>
-          </div>
-        )}
+          </form>
+        </Modal>
       </div>
     </div>
   );

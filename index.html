@@ -19,12 +19,27 @@
 
     <script type="module" src="/src/main.jsx"></script>
 
-    <script src="https://cdn.userway.org/widget.js"></script>
+    <script>
+      const script = document.createElement('script');
+      script.src = 'https://cdn.userway.org/widget.js';
+      script.async = true;
+      script.onerror = function() {
+        console.warn('UserWay widget failed to load');
+      };
+      document.head.appendChild(script);
+    </script>
 
-    <script 
-      crossOrigin="anonymous"
-      src="//unpkg.com/react-scan/dist/auto.global.js"
-    ></script>
+    <script>
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '192.168.15.59') {
+        const script = document.createElement('script');
+        script.crossOrigin = 'anonymous';
+        script.src = '//unpkg.com/react-scan/dist/auto.global.js';
+        script.onerror = function() {
+          console.warn('React DevTools failed to load');
+        };
+        document.head.appendChild(script);
+      }
+    </script>
 
     <style>
       #userwayAccessibilityIcon {
@@ -57,105 +72,103 @@
         opacity: 1;
         visibility: visible;
       }
+
+      :focus {
+        outline: 2px solid #0049ff;
+        outline-offset: 2px;
+      }
     </style>
 
     <script>
-      function initializeDrag() {
-        const userwayIcon = document.getElementById('userwayAccessibilityIcon');
-        const dragPrompt = document.getElementById('dragPrompt');
-
-        if (!userwayIcon) {
-          console.log("UserWay icon not found yet, retrying...");
-          setTimeout(initializeDrag, 500);
-          return;
-        }
-
-        console.log("UserWay icon found! Applying drag functionality.");
-
+      document.addEventListener('DOMContentLoaded', function() {
+        let dragPrompt = document.getElementById('dragPrompt');
+        let userwayIcon = null;
         let isDragging = false;
-        let initialMouseX, initialMouseY; 
-        let initialIconRight, initialIconTop; 
+        let startX, startY, startLeft, startTop;
 
-        function updatePromptPosition() {
-            if (!userwayIcon || !dragPrompt) return;
-
-            const iconRect = userwayIcon.getBoundingClientRect();
-            dragPrompt.style.left = (iconRect.left + iconRect.width / 2) + 'px';
-            dragPrompt.style.top = (iconRect.bottom + 10) + 'px'; 
+        function findUserWayIcon() {
+          return document.getElementById('userwayAccessibilityIcon');
         }
 
-        if (dragPrompt) {
-          updatePromptPosition();
-          setTimeout(() => {
+        function showDragPrompt(x, y) {
+          if (dragPrompt) {
+            dragPrompt.style.left = x + 'px';
+            dragPrompt.style.top = y + 'px';
             dragPrompt.classList.add('show');
-            setTimeout(() => {
-              dragPrompt.classList.remove('show');
-            }, 3000); 
-          }, 500); 
-        }
-
-
-        function dragStart(e) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          isDragging = true;
-          userwayIcon.style.cursor = 'grabbing';
-
-          initialIconRight = window.innerWidth - userwayIcon.getBoundingClientRect().right;
-          initialIconTop = userwayIcon.getBoundingClientRect().top;
-
-          if (e.type === "touchstart") {
-            initialMouseX = e.touches[0].clientX;
-            initialMouseY = e.touches[0].clientY;
-          } else {
-            initialMouseX = e.clientX;
-            initialMouseY = e.clientY;
           }
         }
 
-        function drag(e) {
-          if (!isDragging) return;
-
-          e.preventDefault();
-          e.stopPropagation();
-
-          let currentClientX;
-          let currentClientY;
-
-          if (e.type === "touchmove") {
-            currentClientX = e.touches[0].clientX;
-            currentClientY = e.touches[0].clientY;
-          } else {
-            currentClientX = e.clientX;
-            currentClientY = e.clientY;
+        function hideDragPrompt() {
+          if (dragPrompt) {
+            dragPrompt.classList.remove('show');
           }
-
-          const deltaX = currentClientX - initialMouseX;
-          const deltaY = currentClientY - initialMouseY;
-
-          userwayIcon.style.right = (initialIconRight - deltaX) + 'px';
-          userwayIcon.style.top = (initialIconTop + deltaY) + 'px';
-
-          updatePromptPosition();
         }
 
-        function dragEnd() {
-          isDragging = false;
-          userwayIcon.style.cursor = 'grab';
+        function handleMouseDown(e) {
+          if (e.target.id === 'userwayAccessibilityIcon') {
+            isDragging = true;
+            userwayIcon = e.target;
+            startX = e.clientX;
+            startY = e.clientY;
+            startLeft = parseInt(userwayIcon.style.left) || 20;
+            startTop = parseInt(userwayIcon.style.top) || 60;
+            
+            userwayIcon.style.cursor = 'grabbing';
+            e.preventDefault();
+          }
         }
 
-        userwayIcon.addEventListener("mousedown", dragStart);
-        document.addEventListener("mouseup", dragEnd);
-        document.addEventListener("mousemove", drag);
+        function handleMouseMove(e) {
+          if (isDragging && userwayIcon) {
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            const newLeft = startLeft + deltaX;
+            const newTop = startTop + deltaY;
+            
+            // Limita o movimento dentro da janela
+            const maxX = window.innerWidth - userwayIcon.offsetWidth;
+            const maxY = window.innerHeight - userwayIcon.offsetHeight;
+            
+            userwayIcon.style.left = Math.max(0, Math.min(newLeft, maxX)) + 'px';
+            userwayIcon.style.top = Math.max(0, Math.min(newTop, maxY)) + 'px';
+            
+            showDragPrompt(e.clientX, e.clientY);
+          }
+        }
 
-        userwayIcon.addEventListener("touchstart", dragStart);
-        document.addEventListener("touchend", dragEnd);
-        document.addEventListener("touchmove", drag);
-      }
+        function handleMouseUp() {
+          if (isDragging && userwayIcon) {
+            isDragging = false;
+            userwayIcon.style.cursor = 'grab';
+            hideDragPrompt();
+            userwayIcon = null;
+          }
+        }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initializeDrag, 1000);
+        document.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        function tryFindIcon() {
+          const icon = findUserWayIcon();
+          if (icon) {
+            console.log("UserWay icon found! Applying drag functionality.");
+            return;
+          }
+          
+          attempts++;
+          if (attempts < maxAttempts) {
+            setTimeout(tryFindIcon, 1000);
+          } else {
+            console.warn("UserWay icon not found after multiple attempts");
+          }
+        }
+
+        setTimeout(tryFindIcon, 2000);
       });
     </script>
   </body>

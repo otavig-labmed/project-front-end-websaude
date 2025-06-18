@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
-import styles from '../../../styles/pages-styles/UserControllStyle.module.css';
 import { useNavigate, useParams } from 'react-router-dom';
+import { 
+	Form, 
+	FormSection, 
+	FormField, 
+	FormGrid, 
+	CheckboxGroup, 
+} from "../../../components";
+import styles from '../../../styles/pages-styles/UserControllStyle.module.css';
 
 const UserControllCreate = () => {
 	const { id: userIdFromRoute } = useParams();
@@ -87,8 +94,6 @@ const UserControllCreate = () => {
 	];
 
 	const tipoSanguineoOptions = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-	const estadoCivilOptions = ['Solteiro(a)', 'Casado(a)', 'Divorciado(a)', 'Viúvo(a)', 'Separado(a)'];
-	const sexoOptions = ['Masculino', 'Feminino', 'Outro', 'Prefiro não dizer'];
 
 	const isEditing = !!userIdFromRoute;
 
@@ -170,11 +175,8 @@ const UserControllCreate = () => {
 		loadData();
 	}, [userIdFromRoute, isEditing]);
 
-	const handlePermissaoChange = (permissao) => {
-		setPermissoes(prev => ({
-			...prev,
-			[permissao]: !prev[permissao]
-		}));
+	const handlePermissaoChange = (newPermissoes) => {
+		setPermissoes(newPermissoes);
 	};
 
 	const handleSubmit = async (e) => {
@@ -245,6 +247,17 @@ const UserControllCreate = () => {
 		navigate('/users');
 	};
 
+	const permissaoOptions = [
+		{ key: 'dashboard', label: 'Visualizar Dashboard' },
+		{ key: 'criar_usuario', label: 'Criar Usuários' },
+		{ key: 'editar_usuario', label: 'Editar Usuários' },
+		{ key: 'visualizar_prontuarios', label: 'Visualizar Prontuários' },
+		{ key: 'criar_prontuarios', label: 'Criar Prontuários' },
+		{ key: 'agendar_consultas', label: 'Agendar Consultas' },
+		{ key: 'relatorios', label: 'Gerar Relatórios' },
+		{ key: 'configuracoes', label: 'Acessar Configurações' }
+	];
+
 	if (loading) {
 		return (
 			<div className={styles.card}>
@@ -254,309 +267,188 @@ const UserControllCreate = () => {
 	}
 
 	return (
-		<div className={styles["page-container"]}>
-			<div className={styles.card}>
-				<h2 className={styles.cardTitle}>
-					{isEditing ? "Editar Usuário" : "Criar Usuário"}
-				</h2>
+		<div className={`${styles["page-container"]} ${styles["user-create-container"]}`}>
+			{errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
+			{successMessage && <div className={styles.successMessage}>{successMessage}</div>}
 
-				{errorMessage && <div className={styles.errorMessage}>{errorMessage}</div>}
-				{successMessage && <div className={styles.successMessage}>{successMessage}</div>}
+			<Form
+				onSubmit={handleSubmit}
+				onCancel={handleCancel}
+				onReset={resetForm}
+				loading={saving}
+				submitText={isEditing ? "Atualizar" : "Criar"}
+				showReset={!isEditing}
+				className={styles["user-form"]}
+			>
+				<FormSection title="Informações Básicas">
+					<FormGrid columns={2}>
+						<FormField
+							label="Nome Completo"
+							type="text"
+							id="nome"
+							name="nome"
+							value={nome}
+							onChange={(e) => setNome(e.target.value)}
+							placeholder="Ex: João Almeida dos Santos"
+							required
+						/>
+						<FormField
+							label="E-mail"
+							type="email"
+							id="email"
+							name="email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="Ex: joaoalmeida@gmail.com"
+							required
+						/>
+					</FormGrid>
 
-				<br />
-				<form onSubmit={handleSubmit} className={styles.form}>
-					<div className={styles.formGrid}>
-						<div className={styles.formGroup}>
-							<label htmlFor="nome">Nome Completo*</label>
-							<input
+					<FormGrid columns={2}>
+						<FormField
+							label="Senha"
+							type="password"
+							id="password"
+							name="password"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder={isEditing ? "Deixe em branco para manter a atual" : ""}
+						/>
+						<FormField
+							label="Tipo de Usuário"
+							type="select"
+							id="regra"
+							name="regra"
+							value={regra}
+							onChange={handleRegraChange}
+							options={regraOptions}
+							required
+						/>
+					</FormGrid>
+				</FormSection>
+
+				<FormSection title="Documentos">
+					<FormGrid columns={2}>
+						<FormField
+							label="CPF"
+							type="text"
+							id="cpf"
+							name="cpf"
+							value={cpf}
+							onChange={(e) => setCpf(e.target.value)}
+							placeholder="Ex: 000.000.000-00"
+							maxLength="11"
+						/>
+						<FormField
+							label="RG"
+							type="text"
+							id="rg"
+							name="rg"
+							value={rg}
+							onChange={(e) => setRg(e.target.value)}
+							placeholder="Ex: 00.000.000-0"
+							maxLength="9"
+						/>
+					</FormGrid>
+				</FormSection>
+
+				<FormSection title="Contato">
+					<FormGrid columns={2}>
+						<FormField
+							label="Endereço"
+							type="text"
+							id="endereco"
+							name="endereco"
+							value={endereco}
+							onChange={(e) => setEndereco(e.target.value)}
+							placeholder="Ex: Rua Joaquim Nabuco, 402 - Casa"
+							required
+						/>
+						<FormField
+							label="Telefone"
+							type="text"
+							id="telefone"
+							name="telefone"
+							value={telefone}
+							onChange={(e) => setTelefone(e.target.value)}
+							placeholder="(00) 00000-0000"
+							maxLength="15"
+						/>
+					</FormGrid>
+				</FormSection>
+
+				{regra === 'Doctor' && (
+					<FormSection title="Informações Médicas">
+						<FormGrid columns={2}>
+							<FormField
+								label="CRM"
 								type="text"
-								id="nome"
-								placeholder="Ex: João Almeida dos Santos"
-								value={nome}
-								onChange={(e) => setNome(e.target.value)}
+								id="crm"
+								name="crm"
+								value={crm}
+								onChange={(e) => setCrm(e.target.value)}
+								placeholder="CRM/UF 123456"
 								required
 							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label htmlFor="email">E-mail*</label>
-							<input
-								type="email"
-								id="email"
-								placeholder="Ex: joaoalmeida@gmail.com"
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
+							<FormField
+								label="Especialidade"
+								type="text"
+								id="especialidade"
+								name="especialidade"
+								value={especialidade}
+								onChange={(e) => setEspecialidade(e.target.value)}
 								required
 							/>
-						</div>
-					</div>
+						</FormGrid>
+					</FormSection>
+				)}
 
-					<div className={styles.formGrid}>
-						<div className={styles.formGroup}>
-							<label htmlFor="password">Senha {!isEditing && "(Opcional)"}</label>
-							<input
-								type="password"
-								id="password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-								placeholder={isEditing ? "Deixe em branco para manter a atual" : ""}
-							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label htmlFor="regra">Tipo de Usuário*</label>
-							<select
-								id="regra"
-								value={regra}
-								onChange={handleRegraChange}
-								required
-							>
-								{regraOptions.map((option) => (
-									<option key={option.value} value={option.value}>
-										{option.label}
-									</option>
-								))}
-							</select>
-						</div>
-					</div>
-
-					<div className={styles.formGrid}>
-						<div className={styles.formGroup}>
-							<label htmlFor="cpf">CPF</label>
-							<input
+				{regra === 'Patient' && (
+					<FormSection title="Informações do Paciente">
+						<FormGrid columns={2}>
+							<FormField
+								label="Plano de Saúde"
 								type="text"
-								id="cpf"
-								placeholder="Ex: 000.000.000-00"
-								value={cpf}
-								onChange={(e) => setCpf(e.target.value)}
-								maxLength="11"
+								id="plano_saude"
+								name="plano_saude"
+								value={plano_saude}
+								onChange={(e) => setPlanoSaude(e.target.value)}
 							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label htmlFor="rg">RG</label>
-							<input
-								type="text"
-								id="rg"
-								placeholder="Ex: 00.000.000-0"
-								value={rg}
-								onChange={(e) => setRg(e.target.value)}
-								maxLength="9"
+							<FormField
+								label="Tipo Sanguíneo"
+								type="select"
+								id="tipo_sanguineo"
+								name="tipo_sanguineo"
+								value={tipo_sanguineo}
+								onChange={(e) => setTipoSanguineo(e.target.value)}
+								options={tipoSanguineoOptions}
 							/>
-						</div>
-					</div>
+						</FormGrid>
+						<FormField
+							label="Contato de Emergência"
+							type="text"
+							id="contato_emergencia"
+							name="contato_emergencia"
+							value={contato_emergencia}
+							onChange={(e) => setContatoEmergencia(e.target.value)}
+							placeholder="Nome e telefone"
+						/>
+					</FormSection>
+				)}
 
-					<div className={styles.formGrid}>
-						<div className={styles.formGroup}>
-							<label htmlFor="endereco">Endereço*</label>
-							<input
-								type="text"
-								id="endereco"
-								placeholder="Ex: Rua Joaquim Nabuco, 402 - Casa"
-								value={endereco}
-								onChange={(e) => setEndereco(e.target.value)}
-								required
-							/>
-						</div>
-
-						<div className={styles.formGroup}>
-							<label htmlFor="telefone">Telefone</label>
-							<input
-								type="text"
-								id="telefone"
-								value={telefone}
-								onChange={(e) => setTelefone(e.target.value)}
-								maxLength="15"
-								placeholder="(00) 00000-0000"
-							/>
-						</div>
-					</div>
-
-					{/* Campos específicos para Médico */}
-					{regra === 'Doctor' && (
-						<div className={styles.formGrid}>
-							<div className={styles.formGroup}>
-								<label htmlFor="crm">CRM*</label>
-								<input
-									type="text"
-									id="crm"
-									value={crm}
-									onChange={(e) => setCrm(e.target.value)}
-									required
-									placeholder="CRM/UF 123456"
-								/>
-							</div>
-
-							<div className={styles.formGroup}>
-								<label htmlFor="especialidade">Especialidade*</label>
-								<input
-									type="text"
-									id="especialidade"
-									value={especialidade}
-									onChange={(e) => setEspecialidade(e.target.value)}
-									required
-								/>
-							</div>
-						</div>
-					)}
-
-					{/* Campos específicos para Paciente */}
-					{regra === 'Patient' && (
-						<>
-							<div className={styles.formGrid}>
-								<div className={styles.formGroup}>
-									<label htmlFor="plano_saude">Plano de Saúde</label>
-									<input
-										type="text"
-										id="plano_saude"
-										value={plano_saude}
-										onChange={(e) => setPlanoSaude(e.target.value)}
-									/>
-								</div>
-
-								<div className={styles.formGroup}>
-									<label htmlFor="tipo_sanguineo">Tipo Sanguíneo</label>
-									<select
-										id="tipo_sanguineo"
-										value={tipo_sanguineo}
-										onChange={(e) => setTipoSanguineo(e.target.value)}
-									>
-										<option value="">Selecione</option>
-										{tipoSanguineoOptions.map(tipo => (
-											<option key={tipo} value={tipo}>{tipo}</option>
-										))}
-									</select>
-								</div>
-							</div>
-
-							<div className={styles.formGroup}>
-								<label htmlFor="contato_emergencia">Contato de Emergência</label>
-								<input
-									type="text"
-									id="contato_emergencia"
-									value={contato_emergencia}
-									onChange={(e) => setContatoEmergencia(e.target.value)}
-									placeholder="Nome e telefone"
-								/>
-							</div>
-						</>
-					)}
-
-					{/* Seção de Permissões */}
-					<details className={styles.permissionsSection} open>
-						<summary className={styles.permissionsSummary}>Permissões do Usuário</summary>
-
-						<div className={styles.permissionsGrid}>
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.dashboard}
-										onChange={() => handlePermissaoChange('dashboard')}
-									/>
-									Visualizar Dashboard
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.criar_usuario}
-										onChange={() => handlePermissaoChange('criar_usuario')}
-									/>
-									Criar Usuários
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.editar_usuario}
-										onChange={() => handlePermissaoChange('editar_usuario')}
-									/>
-									Editar Usuários
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.visualizar_prontuarios}
-										onChange={() => handlePermissaoChange('visualizar_prontuarios')}
-									/>
-									Visualizar Prontuários
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.criar_prontuarios}
-										onChange={() => handlePermissaoChange('criar_prontuarios')}
-									/>
-									Criar Prontuários
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.agendar_consultas}
-										onChange={() => handlePermissaoChange('agendar_consultas')}
-									/>
-									Agendar Consultas
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.relatorios}
-										onChange={() => handlePermissaoChange('relatorios')}
-									/>
-									Gerar Relatórios
-								</label>
-							</div>
-
-							<div className={styles.permissionItem}>
-								<label>
-									<input
-										type="checkbox"
-										checked={permissoes.configuracoes}
-										onChange={() => handlePermissaoChange('configuracoes')}
-									/>
-									Acessar Configurações
-								</label>
-							</div>
-						</div>
-					</details>
-
-					<div className={styles.formActions}>
-						<button
-							type="button"
-							onClick={handleCancel}
-							className={styles.cancelButton}
-							disabled={saving}
-						>
-							Cancelar
-						</button>
-
-						<button
-							type="submit"
-							className={styles.submitButton}
-							disabled={saving}
-						>
-							{saving ? "Salvando..." : (isEditing ? "Atualizar" : "Criar")}
-						</button>
-					</div>
-				</form>
-			</div>
+				<FormSection 
+					title="Permissões do Usuário" 
+					collapsible={true}
+					defaultOpen={true}
+				>
+					<CheckboxGroup
+						options={permissaoOptions}
+						values={permissoes}
+						onChange={handlePermissaoChange}
+						columns={2}
+					/>
+				</FormSection>
+			</Form>
 		</div>
 	);
 };

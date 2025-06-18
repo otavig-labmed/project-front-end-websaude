@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  Form, 
+  FormSection, 
+  FormField, 
+  FormGrid, 
+  Modal, 
+} from "../../../components";
 import styles from '../../../styles/pages-styles/CalendarStyle.module.css';
 
 const doctors = [
@@ -79,135 +86,134 @@ const CalendarCreate = () => {
     setEventData(defaultEvent);
   };
 
+  const doctorOptions = doctors.map(doctor => ({
+    value: doctor.id,
+    label: `${doctor.name} - ${doctor.specialty}`
+  }));
+
+  const procedureOptions = procedures.map(proc => ({
+    value: proc.name,
+    label: proc.name
+  }));
+
   return (
     <div className={styles.doctorCalendarContainer}>
-      {showDoctorModal && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <h3 className={styles.modalTitle}>Selecionar Médico</h3>
-            <select 
-              className={styles.doctorSelect}
-              onChange={handleDoctorSelect}
-              value={selectedDoctor?.id || ''}
-            >
-              <option value="">Selecione um médico</option>
-              {doctors.map(doctor => (
-                <option key={doctor.id} value={doctor.id}>
-                  {doctor.name} - {doctor.specialty}
-                </option>
-              ))}
-            </select>
-            <button 
-              className={styles.confirmButton}
-              onClick={() => selectedDoctor && setShowDoctorModal(false)}
-              disabled={!selectedDoctor}
-            >
-              Confirmar
-            </button>
-          </div>
+      <Modal
+        isOpen={showDoctorModal}
+        onClose={() => selectedDoctor && setShowDoctorModal(false)}
+        title="Selecionar Médico"
+        size="small"
+        closeOnOverlayClick={false}
+      >
+        <FormField
+          label="Médico"
+          type="select"
+          id="doctorSelect"
+          name="doctorSelect"
+          value={selectedDoctor?.id || ''}
+          onChange={handleDoctorSelect}
+          options={doctorOptions}
+          placeholder="Selecione um médico"
+          required
+        />
+        <div style={{ marginTop: '1rem', textAlign: 'right' }}>
+          <button 
+            className={styles.confirmButton}
+            onClick={() => selectedDoctor && setShowDoctorModal(false)}
+            disabled={!selectedDoctor}
+          >
+            Confirmar
+          </button>
         </div>
-      )}
+      </Modal>
 
       {selectedDoctor && (
         <div className={styles.scrollContainer}>
           <div className={styles.calendarHeader}>
-            <h1 className={styles.doctorTitle}>Criar Compromisso para {selectedDoctor.name}</h1>
-            <p className={styles.doctorInfo}>
-              CRM: {selectedDoctor.crm} | Especialidade: {selectedDoctor.specialty}
-            </p>
-            <button 
+            <h1 className={styles.doctorTitle}>Criar Compromisso - {selectedDoctor.name}</h1>
+            <br />
+            <button
               className={styles.changeDoctorButton}
               onClick={() => setShowDoctorModal(true)}
             >
-              Trocar Médico
+              Trocar de Médico
             </button>
           </div>
 
           <div className={styles.calendarWrapper}>
-            <form onSubmit={handleCreateEvent}>
-              <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4 }}>Título *</label>
-                <input
+            <Form onSubmit={handleCreateEvent}>
+              <FormSection title="Detalhes do Compromisso">
+                <FormField
+                  label="Título"
                   type="text"
+                  id="title"
                   name="title"
-                  placeholder="Ex: Ultrassom"
                   value={eventData.title}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                  placeholder="Ex: Ultrassom"
                   required
                 />
-              </div>
-              <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Data *</label>
-                  <input
+
+                <FormGrid columns={3}>
+                  <FormField
+                    label="Data"
                     type="date"
+                    id="date"
                     name="date"
                     value={eventData.date}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
                     required
                   />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Início *</label>
-                  <input
+                  <FormField
+                    label="Início"
                     type="time"
+                    id="startTime"
                     name="startTime"
                     value={eventData.startTime}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
                     required
                   />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Fim *</label>
-                  <input
+                  <FormField
+                    label="Fim"
                     type="time"
+                    id="endTime"
                     name="endTime"
                     value={eventData.endTime}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
                     required
                   />
-                </div>
-              </div>
-              <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
-                <div style={{ flex: 2 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Procedimento *</label>
-                  <select
+                </FormGrid>
+
+                <FormGrid columns={2}>
+                  <FormField
+                    label="Procedimento"
+                    type="select"
+                    id="procedure"
                     name="procedure"
                     value={eventData.procedure}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
+                    options={procedureOptions}
+                    placeholder="Selecione um procedimento"
                     required
-                  >
-                    <option value="">Selecione um procedimento</option>
-                    {procedures.map(proc => (
-                      <option key={proc.id} value={proc.name}>{proc.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label style={{ display: 'block', marginBottom: 4 }}>Valor (R$) *</label>
-                  <input
+                  />
+                  <FormField
+                    label="Valor (R$)"
                     type="number"
+                    id="value"
                     name="value"
                     value={eventData.value}
                     onChange={handleChange}
-                    style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #cbd5e1' }}
                     min="0"
                     step="0.01"
                     required
                   />
-                </div>
-              </div>
-              <br />
-              {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
-              <button type="submit" className={styles.confirmButton} style={{ width: '100%' }}>
-                Criar Compromisso
-              </button>
-            </form>
+                </FormGrid>
+
+                {error && (
+                  <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>
+                )}
+              </FormSection>
+            </Form>
           </div>
 
           {events.length > 0 && (

@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, memo } from "react";
 import styles from "../../styles/components-styles/Alerts.module.css";
 
-const Alert = ({ children, type, duration = 5000, onClose }) => {
+const Alert = memo(({ children, type, duration = 5000, onClose }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const handleClose = useCallback(() => {
+    setShowAlert(false);
+    if (onClose) onClose();
+  }, [onClose]);
 
   useEffect(() => {
     setShowAlert(true);
@@ -37,11 +42,6 @@ const Alert = ({ children, type, duration = 5000, onClose }) => {
     good: "container-alert-good",
   };
 
-  const handleClose = () => {
-    setShowAlert(false);
-    if (onClose) onClose();
-  };
-
   return (
     <div
       className={`${styles[types[type]]} ${showAlert ? styles.show : ""}`}
@@ -59,6 +59,8 @@ const Alert = ({ children, type, duration = 5000, onClose }) => {
       </div>
     </div>
   );
-};
+});
+
+Alert.displayName = 'Alert';
 
 export default Alert;

@@ -1,9 +1,6 @@
 import React, { useState } from "react";
+import { DataTable } from '../../../components';
 import styles from '../../../styles/pages-styles/UserControllStyle.module.css';
-
-// Import the necessary icons here
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'; // Added faEdit and faTrash
 
 const UserControllList = ({
   searchTerm,
@@ -38,7 +35,6 @@ const UserControllList = ({
       userType: "Paciente",
       status: "Pendente",
     },
-
   ]);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -75,7 +71,6 @@ const UserControllList = ({
     }
   };
 
-
   const handleDeleteClick = (userToDelete) => {
     setSelectedUser(userToDelete);
     setShowDeleteModal(true);
@@ -107,177 +102,157 @@ const UserControllList = ({
     setEditedUser({ name: '', email: '', userType: '', status: '' }); 
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.userType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Configuração das colunas para o DataTable
+  const columns = [
+    { key: 'name', label: 'Nome' },
+    { key: 'email', label: 'E-mail' },
+    { 
+      key: 'userType', 
+      label: 'Tipo',
+      type: 'badge',
+      badgeType: 'userType',
+      render: (item) => (
+        <span
+          className={styles.badge}
+          style={getUserTypeStyle(item.userType)}
+        >
+          {item.userType}
+        </span>
+      )
+    },
+    { 
+      key: 'status', 
+      label: 'Status',
+      type: 'badge',
+      render: (item) => (
+        <span
+          className={styles.badge}
+          style={getStatusStyle(item.status)}
+        >
+          {item.status}
+        </span>
+      )
+    },
+    { key: 'actions', label: 'Ações', type: 'actions' }
+  ];
+
+  // Configuração dos estilos de badge
+  const badgeConfig = {
+    userType: {
+      "Admin": { backgroundColor: "#fef2f2", color: "#dc2626" },
+      "Doutor": { backgroundColor: "#eff6ff", color: "#2563eb" },
+      "Atendente": { backgroundColor: "#ecfdf5", color: "#059669" },
+      "Paciente": { backgroundColor: "#f5f3ff", color: "#7c3aed" }
+    },
+    status: {
+      "Ativo": { backgroundColor: "#ecfdf5", color: "#059669" },
+      "Inativo": { backgroundColor: "#fef2f2", color: "#dc2626" },
+      "Pendente": { backgroundColor: "#fffbeb", color: "#d97706" }
+    }
+  };
 
   return (
     <div className={styles.card}>
-        <div className={styles.header}>
-          <h2 className={styles.cardTitle}>Lista de Usuários</h2>
-          <div className={styles.searchContainer}>
-            <FontAwesomeIcon icon={faSearch} className={styles.searchIcon} />
-            <input
-              type="text"
-              placeholder="Pesquisar usuários..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+      <DataTable
+        title="Lista de Usuários"
+        data={users}
+        columns={columns}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onEdit={handleEditClick}
+        onDelete={handleDeleteClick}
+        searchPlaceholder="Pesquisar usuários..."
+        emptyMessage="Nenhum usuário encontrado. Crie um novo usuário para começar."
+        badgeConfig={badgeConfig}
+      />
+
+      {showDeleteModal && selectedUser && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Confirmar Exclusão</h3>
+            <p>Você tem certeza que deseja <b style={{textDecoration: 'underline', color: 'red'}}>EXCLUIR</b> o usuário <strong>{selectedUser.name}</strong>?</p>
+            <div className={styles.modalActions}>
+              <button onClick={confirmDelete} className={styles.confirmDeleteButton}>
+                Excluir
+              </button>
+              <button onClick={() => setShowDeleteModal(false)} className={styles.cancelButton}>
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-      <div className={styles.scrollContainer}>
-        {filteredUsers.length === 0 ? (
-          <p className={styles.emptyMessage}>
-            Nenhum usuário encontrado. Crie um novo usuário para começar.
-          </p>
-        ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.userTable}>
-              <thead>
-                <tr>
-                  <th>Nome</th>
-                  <th>E-mail</th>
-                  <th>Tipo</th>
-                  <th>Status</th>
-                  <th className={styles.actionsColumn}>Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map(user => (
-                  <tr key={user.id}>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span
-                        className={styles.badge}
-                        style={getUserTypeStyle(user.userType)}
-                      >
-                        {user.userType}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={styles.badge}
-                        style={getStatusStyle(user.status)}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className={styles.actionsCell}>
-                      <button
-                        onClick={() => handleEditClick(user)}
-                        className={styles.editButton}
-                        title="Editar Usuário" 
-                      >
-                        <FontAwesomeIcon icon={faEdit} className={styles.icon} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(user)}
-                        className={styles.deleteButton}
-                        title="Excluir Usuário" 
-                      >
-                        <FontAwesomeIcon icon={faTrash} className={styles.icon} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {showDeleteModal && selectedUser && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <h3>Confirmar Exclusão</h3>
-              <p>Você tem certeza que deseja excluir o usuário <strong>{selectedUser.name}</strong>?</p>
+      {showEditModal && selectedUser && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalContent}>
+            <h3>Editar Usuário</h3>
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }}>
+              <div className={styles.formGroup}>
+                <label htmlFor="name">Nome:</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={editedUser.name}
+                  onChange={handleEditChange}
+                  className={styles.inputField}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="email">E-mail:</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={editedUser.email}
+                  onChange={handleEditChange}
+                  className={styles.inputField}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="userType">Tipo de Usuário:</label>
+                <select
+                  id="userType"
+                  name="userType"
+                  value={editedUser.userType}
+                  onChange={handleEditChange}
+                  className={styles.selectField}
+                >
+                  <option value="Admin">Admin</option>
+                  <option value="Doutor">Doutor</option>
+                  <option value="Atendente">Atendente</option>
+                  <option value="Paciente">Paciente</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="status">Status:</label>
+                <select
+                  id="status"
+                  name="status"
+                  value={editedUser.status}
+                  onChange={handleEditChange}
+                  className={styles.selectField}
+                >
+                  <option value="Ativo">Ativo</option>
+                  <option value="Inativo">Inativo</option>
+                  <option value="Pendente">Pendente</option>
+                </select>
+              </div>
               <div className={styles.modalActions}>
-                <button onClick={confirmDelete} className={styles.confirmDeleteButton}>
-                  Excluir
-                </button>
-                <button onClick={() => setShowDeleteModal(false)} className={styles.cancelButton}>
+                <button type="button" onClick={() => setShowEditModal(false)} className={styles.cancelButton}>
                   Cancelar
                 </button>
+                <button type="submit" className={styles.saveButton}>
+                  Salvar Alterações
+                </button>
               </div>
-            </div>
+            </form>
           </div>
-        )}
-
-        {showEditModal && selectedUser && (
-          <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-              <h3>Editar Usuário</h3>
-              <form onSubmit={(e) => { e.preventDefault(); handleSaveEdit(); }}>
-                <div className={styles.formGroup}>
-                  <label htmlFor="name">Nome:</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={editedUser.name}
-                    onChange={handleEditChange}
-                    className={styles.inputField}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="email">E-mail:</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={editedUser.email}
-                    onChange={handleEditChange}
-                    className={styles.inputField}
-                    required
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="userType">Tipo de Usuário:</label>
-                  <select
-                    id="userType"
-                    name="userType"
-                    value={editedUser.userType}
-                    onChange={handleEditChange}
-                    className={styles.selectField}
-                  >
-                    <option value="Admin">Admin</option>
-                    <option value="Doutor">Doutor</option>
-                    <option value="Atendente">Atendente</option>
-                    <option value="Paciente">Paciente</option>
-                  </select>
-                </div>
-                <div className={styles.formGroup}>
-                  <label htmlFor="status">Status:</label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={editedUser.status}
-                    onChange={handleEditChange}
-                    className={styles.selectField}
-                  >
-                    <option value="Ativo">Ativo</option>
-                    <option value="Inativo">Inativo</option>
-                    <option value="Pendente">Pendente</option>
-                  </select>
-                </div>
-                <div className={styles.modalActions}>
-                  <button type="button" onClick={() => setShowEditModal(false)} className={styles.cancelButton}>
-                    Cancelar
-                  </button>
-                  <button type="submit" className={styles.saveButton}>
-                    Salvar Alterações
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

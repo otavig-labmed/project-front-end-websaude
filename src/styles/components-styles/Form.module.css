@@ -1,0 +1,29 @@
+.formContainer {
+  width: 100%;
+  max-width: 100%;
+}
+
+.formTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
+  text-align: center;
+}
+
+.form {
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .formContainer {
+    padding: 1rem;
+  }
+  
+  .formTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+} 

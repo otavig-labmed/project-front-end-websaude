@@ -3,7 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLock, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import styles from '../../styles/components-styles/InputFields.module.css';
 
-const PasswordInput = ({ value, onChange }) => {
+const PasswordInput = ({ 
+  value, 
+  onChange, 
+  error, 
+  disabled = false,
+  ...props 
+}) => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
@@ -20,18 +26,25 @@ const PasswordInput = ({ value, onChange }) => {
           placeholder="Digite sua senha"
           value={value}
           onChange={onChange}
-          required
-          className={styles.input}
+          disabled={disabled}
+          className={`${styles.input} ${error ? styles.error : ''}`}
+          {...props}
         />
         <button
           type="button"
           className={styles["toggle-password"]}
           onClick={() => setShowPassword((prev) => !prev)}
           aria-label="Mostrar ou ocultar senha"
+          disabled={disabled}
         >
           <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
         </button>
       </div>
+      {error && (
+        <span className={styles["error-message"]}>
+          {error}
+        </span>
+      )}
     </div>
   );
 };

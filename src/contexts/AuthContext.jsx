@@ -1,8 +1,19 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { api } from '../utils/api.js';
+import { TIMEOUTS, USER_ROLES } from '../utils/constants.js';
+import { logError, getErrorMessage, ERROR_TYPES } from '../utils/errorHandler.js';
 
 const AuthContext = createContext(undefined);
 
-export const AuthProvider = ({ children }) => {
+function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [permissions, setPermissions] = useState(null);
@@ -10,39 +21,38 @@ export const AuthProvider = ({ children }) => {
 
   const clearAuthStates = useCallback(() => {
     setIsAuthenticated(false);
-    // setUserRole(null);
     setPermissions(null);
     localStorage.removeItem('hasLoggedInOnce');
   }, []);
 
   const fetchUserPermissions = useCallback(async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/user/permissions/', {
-        method: 'GET',
-        credentials: 'include', 
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
+      const data = await api.getUserPermissions();
 
-        if (Array.isArray(data.permissoes)) {
-          setUserRole(data.regra);
-          const permissionNames = data.permissoes.map(p => p.nome);
-          setPermissions(permissionNames);
-          //console.log("Permissões carregadas:", permissionNames);
-          return true;
-        } else {
-          console.warn("Rota de permissões retornou dados inesperados:", data);
-          setPermissions([]);
-          return false;
-        }
+      if (Array.isArray(data.permissoes)) {
+        setUserRole(data.regra);
+        const permissionNames = data.permissoes.map(p => p.nome);
+        setPermissions(permissionNames);
+        return true;
       } else {
-        console.error("Erro ao carregar permissões:", response.status);
+        logError(new Error('Dados de permissões inesperados'), 'fetchUserPermissions');
         setPermissions([]);
         return false;
       }
     } catch (error) {
-      console.error("Erro ao carregar permissões:", error);
+      if (error.message === ERROR_TYPES.UNAUTHORIZED) {
+        logError(error, 'fetchUserPermissions - Usuário não autenticado');
+        setPermissions([]);
+        return false;
+      }
+      
+      if (error.message === ERROR_TYPES.NETWORK) {
+        logError(error, 'fetchUserPermissions - Erro de rede');
+        setPermissions([]);
+        return false;
+      }
+      
+      logError(error, 'fetchUserPermissions');
       setPermissions([]);
       return false;
     }
@@ -50,34 +60,32 @@ export const AuthProvider = ({ children }) => {
 
   const checkLoginStatus = useCallback(async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/login/check/", {
-        method: 'GET',
-        credentials: 'include',  
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        //console.log(data.is_authenticated);
-        if (data.message) {
-          setIsAuthenticated(true);
-
-          const permissionsFetched = await fetchUserPermissions();
-          if (permissionsFetched) {
-            localStorage.setItem('hasLoggedInOnce', 'true');
-          } else {
-            //console.log("Caiu 1");
-            clearAuthStates();
-          }
+      const data = await api.checkLogin();
+      
+      if (data.message) {
+        setIsAuthenticated(true);
+        const permissionsFetched = await fetchUserPermissions();
+        if (permissionsFetched) {
+          localStorage.setItem('hasLoggedInOnce', 'true');
         } else {
-          //console.log("Caiu 2");
-          clearAuthStates(); 
+          clearAuthStates();
         }
       } else {
-        //console.log("Caiu 3");
-        clearAuthStates();
+        clearAuthStates(); 
       }
     } catch (error) {
-      console.error("Erro ao verificar login:", error);
+      if (error.message === ERROR_TYPES.UNAUTHORIZED) {
+        logError(error, 'checkLoginStatus - Usuário não autenticado');
+        clearAuthStates();
+        return;
+      }
+      
+      if (error.message === ERROR_TYPES.NETWORK) {
+        logError(error, 'checkLoginStatus - Erro de rede');
+        return;
+      }
+      
+      logError(error, 'checkLoginStatus');
       clearAuthStates();
     }
   }, [fetchUserPermissions, clearAuthStates]);
@@ -87,11 +95,9 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(true);
       const hasLoggedInOnce = localStorage.getItem('hasLoggedInOnce');
       
-      // Se já logou uma vez, tenta verificar o login
       if (hasLoggedInOnce) {
         await checkLoginStatus();
       } else {
-        //console.log("Caiu 4");
         clearAuthStates();
       }
       setIsLoading(false);
@@ -106,7 +112,7 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       interval = setInterval(() => {
         refreshToken(); 
-      }, 800000); 
+      }, TIMEOUTS.TOKEN_REFRESH); 
 
       return () => clearInterval(interval);
     }
@@ -114,58 +120,47 @@ export const AuthProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    // if (userRole !== null) { 
-    //   console.log("userRole atualizado:", userRole);
-    // }
-  }, [userRole]);
-
   const logout = useCallback(async () => {
     try {
-      await fetch('http://127.0.0.1:8000/api/logout/', {
-        method: 'POST',
-        credentials: 'include',  // Inclui cookies de sessão
-      });
-      console.log("Logged out successfully from backend.");
+      await api.logout();
     } catch (error) {
-      console.error("Erro durante o logout no backend:", error);
+      logError(error, 'logout - Erro no backend');
     } finally {
       clearAuthStates();
-      document.cookie = "access_token=; Max-Age=0; path=/"; 
-      document.cookie = "refresh_token=; Max-Age=0; path=/";
+      api.removeCookie("access_token"); 
+      api.removeCookie("refresh_token");
     }
   }, [clearAuthStates]);
 
   const login = useCallback(async (email, password) => {
     setIsLoading(true); 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',  // Inclui cookies de sessão
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setIsAuthenticated(true);
-        localStorage.setItem('hasLoggedInOnce', 'true');
-        
-        const permissionsFetched = await fetchUserPermissions();
-        
-        if (!permissionsFetched) {
-          console.error("Falha ao carregar permissões após login bem-sucedido. Desconectando.");
-          clearAuthStates();
-          return false;
-        }
-        return true;
+      const data = await api.login(email, password);
+      setIsAuthenticated(true);
+      localStorage.setItem('hasLoggedInOnce', 'true');
+      
+      const permissionsFetched = await fetchUserPermissions();
+      
+      if (!permissionsFetched) {
+        logError(new Error('Falha ao carregar permissões após login'), 'login');
+        clearAuthStates();
+        return false;
       }
-      clearAuthStates();
-      return false; 
+      return true;
     } catch (error) {
-      console.error("Falha no login:", error);
+      if (error.message === ERROR_TYPES.UNAUTHORIZED) {
+        logError(error, 'login - Credenciais inválidas');
+        clearAuthStates();
+        return false;
+      }
+      
+      if (error.message === ERROR_TYPES.NETWORK) {
+        logError(error, 'login - Erro de rede');
+        clearAuthStates();
+        return false;
+      }
+      
+      logError(error, 'login');
       clearAuthStates();
       return false;
     } finally {
@@ -173,37 +168,35 @@ export const AuthProvider = ({ children }) => {
     }
   }, [fetchUserPermissions, clearAuthStates]);
 
-  const refreshToken = async () => {
+  const refreshToken = useCallback(async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/refresh/', {
-        method: 'POST',
-        credentials: 'include',
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data);
+      await api.refreshToken();
+    } catch (error) {
+      if (error.message === ERROR_TYPES.UNAUTHORIZED) {
+        logError(error, 'refreshToken - Token expirado');
+        await logout();
       } else {
-        console.error('Erro ao renovar o token');
+        logError(error, 'refreshToken');
         await logout();
       }
-    } catch (error) {
-      console.error('Erro ao tentar renovar o token', error);
-      await logout();
     }
-  };
+  }, [logout]);
+
+  const contextValue = useMemo(() => ({
+    isAuthenticated,
+    userRole,
+    permissions,
+    logout,
+    isLoading,
+    login
+  }), [isAuthenticated, userRole, permissions, logout, isLoading, login]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, permissions, logout, isLoading, login }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+// Exportações nomeadas para compatibilidade com Fast Refresh
+export { AuthProvider, useAuth };

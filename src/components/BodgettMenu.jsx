@@ -1,16 +1,21 @@
-import React, { useState, Suspense } from "react";
+import React, { useState, Suspense, useCallback, useMemo } from "react";
 import styles from "../styles/components-styles/BodgettMenu.module.css";
+
+// Componente de fallback reutilizável
+const LoadingFallback = () => <div>Carregando...</div>;
 
 const BodgettMenu = ({ components }) => {
   const [activeComponent, setActiveComponent] = useState(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const handleItemClick = (component, index) => {
+  const handleItemClick = useCallback((component, index) => {
     setActiveComponent(component);
     setActiveIndex(index);
-  };
+  }, []);
 
-  const renderContent = () => {
+  const menuItems = useMemo(() => components, [components]);
+
+  const renderContent = useCallback(() => {
     if (components.length === 0) {
       return (
         <div className={styles.logoContainer}>
@@ -22,7 +27,7 @@ const BodgettMenu = ({ components }) => {
       <>
         <nav className={styles.bodgettNav}>
           <ul className={styles.bodgettNavList}>
-            {components.map((item, idx) => (
+            {menuItems.map((item, idx) => (
               <li key={idx} className={activeIndex === idx ? styles.bodgettActive : ""}>
                 <button
                   onClick={() => handleItemClick(item.component, idx)}
@@ -35,15 +40,13 @@ const BodgettMenu = ({ components }) => {
           </ul>
         </nav>
         <div className={styles.componentContainer}>
-          {activeComponent || (
-            <Suspense fallback={<div>Carregando...</div>}>
-              {components[0].component}
-            </Suspense>
-          )}
+          <Suspense fallback={<LoadingFallback />}>
+            {activeComponent || components[0].component}
+          </Suspense>
         </div>
       </>
     );
-  };
+  }, [components, menuItems, activeIndex, activeComponent, handleItemClick]);
 
   return (
     <div className={styles.bodgettContainer}>

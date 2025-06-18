@@ -1,24 +1,193 @@
 .form-container {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 20px; 
-}
-
-.card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  border: 1px solid #e2e8f0;
-  padding: 24px 20px;
-  margin-bottom: 20%;
-  overflow-y: visible;
+  padding-bottom: 20px;
 }
 
 .page-container {
   height: 100vh;
-  overflow-y: auto; 
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
+  padding: 1rem;
+}
+
+/* Estilos específicos para o formulário de criação/edição */
+.page-container .form {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.page-container .section {
+  padding: 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.page-container .section:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.page-container .sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+/* Melhorar visibilidade dos botões */
+.page-container .formActions {
+  position: sticky;
+  bottom: 0;
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 2px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.page-container .submitButton {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.page-container .submitButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+}
+
+.page-container .cancelButton {
+  background: #f8fafc;
+  color: #475569;
+  border: 2px solid #e2e8f0;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.page-container .cancelButton:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #334155;
+  transform: translateY(-1px);
+}
+
+.page-container .resetButton {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: #92400e;
+  border: none;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(251, 191, 36, 0.3);
+}
+
+.page-container .resetButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.4);
+}
+
+/* Mensagens de erro e sucesso */
+.errorMessage {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+.successMessage {
+  background: #f0fdf4;
+  color: #16a34a;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
+
+/* Melhorar espaçamento dos campos */
+.page-container .formGrid {
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.page-container .formGroup {
+  margin-bottom: 0.5rem;
+}
+
+.page-container .formGroup label {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+.page-container .formGroup input,
+.page-container .formGroup select {
+  padding: 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease;
+}
+
+.page-container .formGroup input:focus,
+.page-container .formGroup select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 0.5rem;
+  }
+  
+  .page-container .section {
+    margin-bottom: 0.75rem;
+    padding: 1rem;
+  }
+  
+  .page-container .formActions {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .page-container .submitButton,
+  .page-container .cancelButton,
+  .page-container .resetButton {
+    width: 100%;
+    min-width: auto;
+  }
 }
 
 .cardTitle {
@@ -26,10 +195,6 @@
   font-size: 1.2rem;
   font-weight: 500;
   margin-bottom: 16px;
-}
-
-.form {
-  width: 100%;
 }
 
 .formGrid {
@@ -51,7 +216,7 @@
   font-size: 0.9rem;
 }
 
-.formGroup label:hover {  
+.formGroup label:hover {
   cursor: pointer;
 }
 
@@ -108,12 +273,12 @@
 
 .searchContainer {
   position: relative;
-  width: 300px; 
+  width: 300px;
 }
 
 .searchContainer input {
   width: 100%;
-  padding: 10px 10px 10px 36px; 
+  padding: 10px 10px 10px 36px;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -134,7 +299,7 @@
 }
 
 .tableContainer {
-  overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .userTable {
@@ -147,13 +312,13 @@
   text-align: left;
   color: #64748b;
   font-size: 0.9rem;
-  background-color: #f1f5f9; 
+  background-color: #f1f5f9;
 }
 
 .userTable td {
   padding: 12px;
   color: #1e293b;
-  border-bottom: 1px solid #e2e8f0; 
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .badge {
@@ -266,7 +431,7 @@
   .permissionsGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .permissionItem {
     padding: 8px;
   }
@@ -290,18 +455,17 @@
   background: #a8a8a8;
 }
 
-
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); 
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; 
+  z-index: 1000;
 }
 
 .modalContent {
@@ -311,7 +475,7 @@
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   width: 90%;
   max-width: 500px;
-  animation: fadeIn 0.3s ease-out; 
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modalContent h3 {
@@ -331,8 +495,8 @@
 
 .modalActions {
   display: flex;
-  justify-content: flex-end; 
-  gap: 10px; 
+  justify-content: flex-end;
+  gap: 10px;
   margin-top: 20px;
 }
 
@@ -357,7 +521,7 @@
 }
 
 .confirmDeleteButton {
-  background-color: #dc2626; 
+  background-color: #dc2626;
   color: #fff;
 }
 
@@ -366,7 +530,7 @@
 }
 
 .saveButton {
-  background-color: #2563eb; 
+  background-color: #2563eb;
   color: #fff;
 }
 
@@ -392,7 +556,7 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1em;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 }
 
 .inputField:focus,
@@ -403,121 +567,137 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .badge {
-    display: inline-block;
-    padding: 0.3em 0.7em;
-    border-radius: 9999px;
-    font-size: 0.8em;
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
-    line-height: 1;
+  display: inline-block;
+  padding: 0.3em 0.7em;
+  border-radius: 9999px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1;
 }
 
-
 .emptyMessage {
-    text-align: center;
-    color: #777;
-    padding: 40px 0;
-    font-size: 1.1em;
+  text-align: center;
+  color: #777;
+  padding: 40px 0;
+  font-size: 1.1em;
 }
 
 .tableContainer {
-    overflow-x: auto; 
+  overflow-x: auto;
 }
 
 .userTable {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
 }
 
 .userTable th,
 .userTable td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
 }
 
 .userTable th {
-    background-color: #f8f8f8;
-    color: #666;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.9em;
+  background-color: #f8f8f8;
+  color: #666;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9em;
 }
 
 .userTable td {
-    color: #555;
+  color: #555;
 }
 
 .userTable tbody tr:hover {
-    background-color: #f5f5f5;
+  background-color: #f5f5f5;
 }
 
 .actionsColumn {
-    width: 150px;
-    text-align: center;
+  width: 150px;
+  text-align: center;
 }
 
 .actionsCell {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
 }
 
 .editButton,
 .deleteButton {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 0.9em;
-    transition: background-color 0.2s ease;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.2s ease;
 }
 
 .editButton {
-    background-color: #2563eb;
-    color: #fff;
+  background-color: #2563eb;
+  color: #fff;
 }
 
 .editButton:hover {
-    background-color: #1d4ed8;
+  background-color: #1d4ed8;
 }
 
 .deleteButton {
-    background-color: #ef4444;
-    color: #fff;
+  background-color: #ef4444;
+  color: #fff;
 }
 
 .deleteButton:hover {
-    background-color: #dc2626;
+  background-color: #dc2626;
 }
 
 .scrollContainer {
-    max-height: calc(108vh - 200px);
-    overflow-y: auto;
-    padding-right: 8px;
+  max-height: calc(108vh - 200px);
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 .scrollContainer::-webkit-scrollbar {
-    width: 8px;
+  width: 8px;
 }
 
 .scrollContainer::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 4px;
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
 .scrollContainer::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 .scrollContainer::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+  background: #94a3b8;
+}
+
+/* Estilos específicos para o container de criação de usuário */
+.user-create-container {
+  min-height: 100vh;
+}
+
+.user-form {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
 }

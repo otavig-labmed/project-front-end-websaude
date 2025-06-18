@@ -112,15 +112,6 @@
     background-color: #f8fafc;
 }
 
-.calendarWrapper {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
-    overflow-x: auto;
-}
-
 /* FullCalendar custom styles */
 :global(.fc) {
     min-width: 800px;
