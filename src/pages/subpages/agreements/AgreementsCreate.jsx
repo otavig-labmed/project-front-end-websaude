@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from '../../../styles/pages-styles/UserControllStyle.module.css';
+import styles from '../../../styles/pages-styles/AgreementsStyle.module.css';
 
 const AgreementsCreate = () => {
     const navigate = useNavigate();

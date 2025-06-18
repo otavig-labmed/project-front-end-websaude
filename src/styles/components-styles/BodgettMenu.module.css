@@ -1,9 +1,11 @@
 .bodgettContainer {
   width: 100%;
   height: 100vh;
+  min-height: 100vh;
   padding: 1rem 2rem;
   background: #fff;
   border-bottom: 1px solid #e0e0e0;
+  box-sizing: border-box;
 }
 
 .bodgettTitle {
@@ -23,6 +25,7 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-wrap: wrap;
 }
 
 .menuButton {
@@ -38,6 +41,7 @@
   font-size: 1rem;
   font-family: inherit;
   outline: none;
+  white-space: nowrap;
 }
 
 .menuButton:hover {
@@ -70,4 +74,45 @@
 .componentContainer {
   /* padding: 0rem; */
   margin-top: 1rem;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Melhorias para responsividade ao zoom */
+@media screen and (max-width: 768px) {
+  .bodgettContainer {
+    padding: 0.5rem 1rem;
+  }
+  
+  .bodgettTitle {
+    font-size: 1.2rem;
+  }
+  
+  .bodgettNavList {
+    gap: 1rem;
+  }
+  
+  .menuButton {
+    font-size: 0.9rem;
+  }
+}
+
+@media screen and (max-resolution: 96dpi) {
+  .bodgettContainer {
+    padding: 0.8rem 1.5rem;
+  }
+  
+  .bodgettTitle {
+    font-size: 1.3rem;
+  }
+}
+
+@media screen and (min-resolution: 144dpi) {
+  .bodgettContainer {
+    padding: 1.2rem 2.5rem;
+  }
+  
+  .bodgettTitle {
+    font-size: 1.7rem;
+  }
 }

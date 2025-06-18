@@ -18,7 +18,6 @@ const Patient = lazy(()=> import('./subpages/patient/Patient.jsx'));
 
 const Alert = lazy(() => import('../components/alerts/Alert'));
 
-// Componente de fallback otimizado
 const LoadingFallback = memo(() => <div>Carregando...</div>);
 LoadingFallback.displayName = 'LoadingFallback';
 
@@ -34,23 +33,35 @@ const MenuItem = memo(({
   onMouseLeave, 
   itemRef 
 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+
   if (!isVisible) return null;
 
   return (
-    <li
-      ref={itemRef}
-      className={isActive ? styles.active : ''}
-      onClick={() => onItemClick(item.name)}
-      onMouseEnter={() => onMouseEnter(item.name)}
-      onMouseLeave={onMouseLeave}
-    >
-      <i className={`fas ${item.icon}`}></i>
-      {!isSidebarCollapsed && <span>{item.label}</span>}
+    <>
+      <li
+        ref={itemRef}
+        className={isActive ? styles.active : ''}
+        onClick={() => onItemClick(item.name)}
+        onMouseEnter={() => {
+          setIsHovered(true);
+          onMouseEnter(item.name);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          onMouseLeave();
+        }}
+      >
+        <i className={`fas ${item.icon}`}></i>
+        {!isSidebarCollapsed && <span>{item.label}</span>}
+      </li>
 
-      {isSidebarCollapsed && hoveredItem === item.name && (
-        <TooltipPortal targetRef={itemRef}>{item.label}</TooltipPortal>
+      {isSidebarCollapsed && isHovered && (
+        <TooltipPortal targetRef={itemRef} position="right">
+          {item.label}
+        </TooltipPortal>
       )}
-    </li>
+    </>
   );
 });
 MenuItem.displayName = 'MenuItem';

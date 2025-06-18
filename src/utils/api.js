@@ -1,6 +1,5 @@
 import { API_ENDPOINTS } from './constants.js';
 
-// Função para configurar cookies manualmente
 const setCookie = (name, value, options = {}) => {
   const defaultOptions = {
     path: '/',
@@ -33,7 +32,6 @@ const setCookie = (name, value, options = {}) => {
   document.cookie = cookieString;
 };
 
-// Função para obter cookies
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -41,12 +39,10 @@ const getCookie = (name) => {
   return null;
 };
 
-// Função para remover cookies
 const removeCookie = (name) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 };
 
-// Configuração base para requisições
 const baseConfig = {
   credentials: 'include',
   headers: {
@@ -55,10 +51,9 @@ const baseConfig = {
   mode: 'cors',
 };
 
-// Função utilitária para fazer requisições
 const apiRequest = async (url, options = {}) => {
   try {
-    // Verificar se há cookies de autenticação para endpoints protegidos
+
     const isProtectedEndpoint = url.includes('/user/permissions/') || 
                                url.includes('/login/check/') || 
                                url.includes('/refresh/');
@@ -81,24 +76,19 @@ const apiRequest = async (url, options = {}) => {
 
     const response = await fetch(url, config);
     
-    // Tratamento específico para diferentes status codes
     if (response.status === 401) {
-      // Unauthorized - usuário não está autenticado
       throw new Error('UNAUTHORIZED');
     }
     
     if (response.status === 403) {
-      // Forbidden - usuário não tem permissão
       throw new Error('FORBIDDEN');
     }
     
     if (response.status === 404) {
-      // Not Found
       throw new Error('NOT_FOUND');
     }
     
     if (response.status >= 500) {
-      // Erro do servidor
       throw new Error('SERVER_ERROR');
     }
     
@@ -106,22 +96,19 @@ const apiRequest = async (url, options = {}) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
-    // Verifica se a resposta tem conteúdo antes de tentar fazer parse
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
       return await response.json();
     }
     
-    // Se não for JSON, retorna o texto
     return await response.text();
   } catch (error) {
-    // Se for erro de rede, não loga como erro da API
+
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       console.warn('Erro de rede - verifique sua conexão:', error.message);
       throw new Error('NETWORK_ERROR');
     }
     
-    // Se já é um erro customizado, apenas repassa
     if (error.message === 'UNAUTHORIZED' || 
         error.message === 'FORBIDDEN' || 
         error.message === 'NOT_FOUND' || 
